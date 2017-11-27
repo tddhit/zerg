@@ -2,75 +2,59 @@ package engine
 
 import (
 	"log"
-	"net/http"
-	"sync"
 
 	"github.com/tddhit/zerg/downloader"
 	"github.com/tddhit/zerg/pipeline"
 	"github.com/tddhit/zerg/scheduler"
 	"github.com/tddhit/zerg/spider"
-	"github.com/tddhit/zerg/util"
+	"github.com/tddhit/zerg/types"
 )
 
-type Request struct {
-	*http.Request
-}
-
-type Response struct {
-	*http.Response
-}
-
-type Item struct {
-	associatedWriter Writer
-	Dict             map[string]string
-}
-
 type Engine struct {
-	mutex      sync.Mutex
 	spiders    map[string]*spider.Spider
-	scheduler  scheduler.Scheduler
-	downloader downloader.Downloader
-	pipeline   pipeline.Pipeline
+	scheduler  *scheduler.Scheduler
+	downloader *downloader.Downloader
+	pipeline   *pipeline.Pipeline
 
 	//与scheduler通信
-	reqToSchedulerChan   chan *Request
-	reqFromSchedulerChan chan *Request
+	reqToSchedulerChan   chan *types.Request
+	reqFromSchedulerChan chan *types.Request
 
 	//与spider通信
-	reqFromSpiderChan  chan *Request
-	rspToSpiderChan    chan *Response
-	itemFromSpiderChan chan *Item
+	reqFromSpiderChan  chan *types.Request
+	rspToSpiderChan    chan *types.Response
+	itemFromSpiderChan chan *types.Item
 
 	//与downloader通信
-	reqToDownloaderChan   chan *Request
-	rspFromDownloaderChan chan *Response
+	reqToDownloaderChan   chan *types.Request
+	rspFromDownloaderChan chan *types.Response
 
 	//与pipeline通信
-	itemToPipelineChan chan *Item
+	itemToPipelineChan chan *types.Item
 }
 
 func NewEngine() *Engine {
 	e := &Engine{
 		spiders:               make(map[string]*spider.Spider),
-		reqToSchedulerChan:    make(chan *Request, 10),
-		reqFromSchedulerChan:  make(chan *Request, 10),
-		reqFromSpiderChan:     make(chan *Request, 10),
-		rspToSpiderChan:       make(chan *Response, 10),
-		itemFromSpiderChan:    make(chan *Item, 10),
-		reqToDownloaderChan:   make(chan *Request, 10),
-		rspFromDownloaderChan: make(chan *Response, 10),
-		itemToPipelineChan:    make(chan *Item, 10),
+		reqToSchedulerChan:    make(chan *types.Request, 10),
+		reqFromSchedulerChan:  make(chan *types.Request, 10),
+		reqFromSpiderChan:     make(chan *types.Request, 10),
+		rspToSpiderChan:       make(chan *types.Response, 10),
+		itemFromSpiderChan:    make(chan *types.Item, 10),
+		reqToDownloaderChan:   make(chan *types.Request, 10),
+		rspFromDownloaderChan: make(chan *types.Response, 10),
+		itemToPipelineChan:    make(chan *types.Item, 10),
 	}
-	e.scheduler = scheduler.NewScheduler(reqToSchedulerChan, reqFromSchedulerChan)
-	e.downloader = downloader.NewDownloader(reqToDownloaderChan, rspToEngineChan)
-	e.pipeline = pipeline.NewPipeline(itemFromEngineChan)
+	e.scheduler = scheduler.NewScheduler(e.reqToSchedulerChan, e.reqFromSchedulerChan)
+	e.downloader = downloader.NewDownloader(e.reqToDownloaderChan, e.rspFromDownloaderChan)
+	e.pipeline = pipeline.NewPipeline(e.itemToPipelineChan)
 	return e
 }
 
-func (e *Engine) AddSpider(spider spider.Spider) *Engine {
-	if sp, ok := e.spiders[spider.Name]; !ok {
+func (e *Engine) AddSpider(spider *spider.Spider) *Engine {
+	if _, ok := e.spiders[spider.Name]; !ok {
 		e.spiders[spider.Name] = spider
-		spider.SetupChan(reqFromSpiderChan, itemFromSpiderChan, rspToSpiderChan)
+		spider.SetupChan(e.reqFromSpiderChan, e.itemFromSpiderChan, e.rspToSpiderChan)
 	} else {
 		log.Printf("Warning: spider %s is already exist!", spider.Name)
 	}
@@ -92,35 +76,35 @@ func (e *Engine) SetPipelinePolicy(w Writer) {
 */
 
 func (e *Engine) Start() {
-	scheduler.Go()
-	downloader.Go()
-	pipeline.Go()
-	for _, spider := range spiders {
+	e.scheduler.Go()
+	e.downloader.Go()
+	e.pipeline.Go()
+	for _, spider := range e.spiders {
 		spider.Go()
 	}
 	for {
 		select {
-		case req := <-reqFromSpiderChan:
+		case req := <-e.reqFromSpiderChan:
 			select {
-			case reqToSchedulerChan <- req:
+			case e.reqToSchedulerChan <- req:
 			default:
 				log.Println("Warning: req -> scheduler is full, discard!")
 			}
-		case req := <-reqFromSchedulerChan:
+		case req := <-e.reqFromSchedulerChan:
 			select {
-			case reqToDownloaderChan <- req:
+			case e.reqToDownloaderChan <- req:
 				log.Println("Warning: req -> downloader is full, discard!")
 			default:
 			}
-		case rsp := <-rspFromDownloaderChan:
+		case rsp := <-e.rspFromDownloaderChan:
 			select {
-			case rspToSpiderChan <- rsp:
+			case e.rspToSpiderChan <- rsp:
 			default:
 				log.Println("Warning: rsp -> spider is full, discard!")
 			}
-		case item := <-itemFromSpiderChan:
+		case item := <-e.itemFromSpiderChan:
 			select {
-			case itemToPipelineChan <- item:
+			case e.itemToPipelineChan <- item:
 			default:
 				log.Println("Warning: item -> pipeline is full, discard!")
 			}
