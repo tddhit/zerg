@@ -2,7 +2,6 @@ package spider
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/tddhit/zerg/types"
 )
@@ -30,13 +29,9 @@ func NewSpider(name string, parser Parser) *Spider {
 }
 
 func (s *Spider) AddSeed(url string) {
-	req, _ := http.NewRequest("GET", url, nil)
-	ireq := &types.Request{
-		Request: req,
-		RawURL:  url,
-	}
+	req, _ := types.NewRequest(url, s.Name)
 	select {
-	case s.seeds <- ireq:
+	case s.seeds <- req:
 	default:
 		log.Println("Warning: chan is full, discard!")
 	}

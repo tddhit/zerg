@@ -21,9 +21,9 @@ type Engine struct {
 	reqFromSchedulerChan chan *types.Request
 
 	//与spider通信
-	reqFromSpiderChan  chan *types.Request
-	rspToSpiderChan    chan *types.Response
-	itemFromSpiderChan chan *types.Item
+	reqFromSpiderChans  map[string]chan *types.Request
+	rspToSpiderChans    map[string]chan *types.Response
+	itemFromSpiderChans map[string]chan *types.Item
 
 	//与downloader通信
 	reqToDownloaderChan   chan *types.Request
@@ -38,9 +38,9 @@ func NewEngine() *Engine {
 		spiders:               make(map[string]*spider.Spider),
 		reqToSchedulerChan:    make(chan *types.Request, 100),
 		reqFromSchedulerChan:  make(chan *types.Request, 100),
-		reqFromSpiderChan:     make(chan *types.Request, 100),
-		rspToSpiderChan:       make(chan *types.Response, 100),
-		itemFromSpiderChan:    make(chan *types.Item, 100),
+		reqFromSpiderChans:    make(map[string]chan *types.Request),
+		rspToSpiderChans:      make(map[string]chan *types.Response),
+		itemFromSpiderChans:   make(map[string]chan *types.Item),
 		reqToDownloaderChan:   make(chan *types.Request, 100),
 		rspFromDownloaderChan: make(chan *types.Response, 100),
 		itemToPipelineChan:    make(chan *types.Item, 100),
@@ -53,8 +53,12 @@ func NewEngine() *Engine {
 
 func (e *Engine) AddSpider(spider *spider.Spider) *Engine {
 	if _, ok := e.spiders[spider.Name]; !ok {
+		e.reqFromSpiderChans[spider.Name] = make(chan *types.Request, 100)
+		e.itemFromSpiderChans[spider.Name] = make(chan *types.Item, 100)
+		e.rspToSpiderChans[spider.Name] = make(chan *types.Response, 100)
+		spider.SetupChan(e.reqFromSpiderChans[spider.Name],
+			e.itemFromSpiderChans[spider.Name], e.rspToSpiderChans[spider.Name])
 		e.spiders[spider.Name] = spider
-		spider.SetupChan(e.reqFromSpiderChan, e.itemFromSpiderChan, e.rspToSpiderChan)
 	} else {
 		log.Printf("Warning: spider %s is already exist!", spider.Name)
 	}
@@ -79,17 +83,27 @@ func (e *Engine) Start() {
 	e.scheduler.Go()
 	e.downloader.Go()
 	e.pipeline.Go()
-	for _, spider := range e.spiders {
+	for name, spider := range e.spiders {
 		spider.Go()
+		go func() {
+			select {
+			case req := <-e.reqFromSpiderChans[name]:
+				select {
+				case e.reqToSchedulerChan <- req:
+				default:
+					log.Println("Warning: req -> scheduler is full, discard!")
+				}
+			case item := <-e.itemFromSpiderChans[name]:
+				select {
+				case e.itemToPipelineChan <- item:
+				default:
+					log.Println("Warning: item -> pipeline is full, discard!")
+				}
+			}
+		}()
 	}
 	for {
 		select {
-		case req := <-e.reqFromSpiderChan:
-			select {
-			case e.reqToSchedulerChan <- req:
-			default:
-				log.Println("Warning: req -> scheduler is full, discard!")
-			}
 		case req := <-e.reqFromSchedulerChan:
 			select {
 			case e.reqToDownloaderChan <- req:
@@ -98,15 +112,9 @@ func (e *Engine) Start() {
 			}
 		case rsp := <-e.rspFromDownloaderChan:
 			select {
-			case e.rspToSpiderChan <- rsp:
+			case e.rspToSpiderChans[rsp.Spider] <- rsp:
 			default:
 				log.Println("Warning: rsp -> spider is full, discard!")
-			}
-		case item := <-e.itemFromSpiderChan:
-			select {
-			case e.itemToPipelineChan <- item:
-			default:
-				log.Println("Warning: item -> pipeline is full, discard!")
 			}
 		}
 	}

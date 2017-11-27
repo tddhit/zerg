@@ -27,12 +27,12 @@ func (p *Parser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
 	} else {
 		doc.Find("#archive .post-thumb a").Each(func(i int, contentSelection *goquery.Selection) {
 			href, _ := contentSelection.Attr("href")
-			req, _ := types.NewRequest(href)
+			req, _ := types.NewRequest(href, rsp.Spider)
 			reqs = append(reqs, req)
 		})
 		doc.Find(".next.page-numbers").Each(func(i int, contentSelection *goquery.Selection) {
 			href, _ := contentSelection.Attr("href")
-			req, _ := types.NewRequest(href)
+			req, _ := types.NewRequest(href, rsp.Spider)
 			reqs = append(reqs, req)
 		})
 	}

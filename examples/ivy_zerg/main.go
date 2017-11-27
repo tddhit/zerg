@@ -9,8 +9,8 @@ import (
 	//"./downloader"
 	//"./pipeline"
 	//"./scheduler"
-	"github.com/tddhit/zerg/examples/ivy_zerg/spider/cnblogs"
-	"github.com/tddhit/zerg/examples/ivy_zerg/spider/jobbole"
+	"./spider/cnblogs"
+	"./spider/jobbole"
 )
 
 func main() {

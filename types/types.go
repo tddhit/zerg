@@ -7,11 +7,13 @@ import (
 type Request struct {
 	*http.Request
 	RawURL string
+	Spider string
 }
 
 type Response struct {
 	*http.Response
 	RawURL string
+	Spider string
 }
 
 type Item struct {
@@ -19,7 +21,7 @@ type Item struct {
 	Dict map[string]string
 }
 
-func NewRequest(url string) (*Request, error) {
+func NewRequest(url, spiderName string) (*Request, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -27,6 +29,7 @@ func NewRequest(url string) (*Request, error) {
 	ireq := &Request{
 		Request: req,
 		RawURL:  url,
+		Spider:  spiderName,
 	}
 	return ireq, nil
 }
