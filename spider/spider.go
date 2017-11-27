@@ -1,9 +1,8 @@
 package spider
 
 import (
-	"log"
-
 	"github.com/tddhit/zerg/types"
+	"github.com/tddhit/zerg/util"
 )
 
 type Parser interface {
@@ -33,7 +32,7 @@ func (s *Spider) AddSeed(url string) {
 	select {
 	case s.seeds <- req:
 	default:
-		log.Println("Warning: chan is full, discard!")
+		util.LogWarn("spider[%s] -> engine, chan is full, discard %s!", req.Spider, req.RawURL)
 	}
 }
 
@@ -62,6 +61,8 @@ func (s *Spider) Go() {
 			if rsp != nil {
 				item, reqs := s.Parse(rsp)
 				if item != nil {
+					item.RawURL = rsp.RawURL
+					item.Spider = rsp.Spider
 					s.itemToEngineChan <- item
 				}
 				for _, req := range reqs {

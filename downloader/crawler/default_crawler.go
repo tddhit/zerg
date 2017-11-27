@@ -1,10 +1,10 @@
 package crawler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/tddhit/zerg/types"
+	"github.com/tddhit/zerg/util"
 )
 
 type HTTPCrawler struct {
@@ -22,7 +22,7 @@ func NewHTTPCrawler() *HTTPCrawler {
 func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	rsp, err := c.Do(req.Request)
 	if err != nil {
-		log.Println("Failed Crawl %s %d\n!", req.RawURL, rsp.Status)
+		util.LogError("Failed Crawl %s %s\n!", req.RawURL, err)
 		return nil
 	}
 	irsp := &types.Response{

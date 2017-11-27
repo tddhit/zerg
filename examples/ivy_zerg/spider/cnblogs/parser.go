@@ -5,6 +5,8 @@ import (
 	"github.com/tddhit/zerg/types"
 )
 
+const ROOTURL = "https://www.cnblogs.com/"
+
 type Parser struct {
 }
 
@@ -23,12 +25,12 @@ func (p *Parser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
 	} else {
 		doc.Find("#post_list .post_item_body h3 a").Each(func(i int, contentSelection *goquery.Selection) {
 			href, _ := contentSelection.Attr("href")
-			req, _ := types.NewRequest(href)
+			req, _ := types.NewRequest(href, rsp.Spider)
 			reqs = append(reqs, req)
 		})
 		doc.Find("#pager_bottom .pager :last-child").Each(func(i int, contentSelection *goquery.Selection) {
 			href, _ := contentSelection.Attr("href")
-			req, _ := types.NewRequest(href)
+			req, _ := types.NewRequest(ROOTURL+href, rsp.Spider)
 			reqs = append(reqs, req)
 		})
 	}

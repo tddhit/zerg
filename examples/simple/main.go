@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
-
 	"github.com/PuerkitoBio/goquery"
 	"github.com/tddhit/zerg/engine"
 	"github.com/tddhit/zerg/spider"
 	"github.com/tddhit/zerg/types"
+	"github.com/tddhit/zerg/util"
 )
 
 type Parser struct {
@@ -40,12 +39,9 @@ func (p *Parser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Llongfile)
-	engine := engine.NewEngine()
-
 	jobboleSpider := spider.NewSpider("jobbole", NewParser())
 	jobboleSpider.AddSeed("http://blog.jobbole.com/all-posts/")
-
+	engine := engine.NewEngine(util.Option{LogLevel: util.INFO})
 	engine.AddSpider(jobboleSpider)
 	engine.Start()
 }

@@ -18,7 +18,9 @@ type Response struct {
 
 type Item struct {
 	//associatedWriter Writer
-	Dict map[string]string
+	Dict   map[string]string
+	RawURL string
+	Spider string
 }
 
 func NewRequest(url, spiderName string) (*Request, error) {

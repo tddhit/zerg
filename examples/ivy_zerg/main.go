@@ -1,21 +1,15 @@
 package main
 
 import (
-	"log"
-
 	"github.com/tddhit/zerg/engine"
 	"github.com/tddhit/zerg/spider"
+	"github.com/tddhit/zerg/util"
 
-	//"./downloader"
-	//"./pipeline"
-	//"./scheduler"
-	"./spider/cnblogs"
-	"./spider/jobbole"
+	"github.com/tddhit/zerg/examples/ivy_zerg/spider/cnblogs"
+	"github.com/tddhit/zerg/examples/ivy_zerg/spider/jobbole"
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Llongfile)
-	engine := engine.NewEngine()
 
 	jobboleSpider := spider.NewSpider("jobbole", jobbole.NewParser())
 	jobboleSpider.AddSeed("http://blog.jobbole.com/all-posts/")
@@ -25,6 +19,7 @@ func main() {
 	cnblogsSpider.AddSeed("http://www.cnblogs.com")
 	//cnblogsSpider.AssociateWriter(pipeline.NewFileWriter())
 
+	engine := engine.NewEngine(util.Option{LogLevel: util.INFO})
 	engine.AddSpider(jobboleSpider).AddSpider(cnblogsSpider)
 	//engine.SetSchedulerPolicy(scheduler.NewQueuer())
 	//engine.AddDownloaderPolicy(downloader.NewCrawler())
