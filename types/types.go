@@ -11,9 +11,29 @@ type Request struct {
 
 type Response struct {
 	*http.Response
+	RawURL string
 }
 
 type Item struct {
 	//associatedWriter Writer
 	Dict map[string]string
+}
+
+func NewRequest(url string) (*Request, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	ireq := &Request{
+		Request: req,
+		RawURL:  url,
+	}
+	return ireq, nil
+}
+
+func NewItem() *Item {
+	i := &Item{
+		Dict: make(map[string]string),
+	}
+	return i
 }

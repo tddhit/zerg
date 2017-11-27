@@ -36,14 +36,14 @@ type Engine struct {
 func NewEngine() *Engine {
 	e := &Engine{
 		spiders:               make(map[string]*spider.Spider),
-		reqToSchedulerChan:    make(chan *types.Request, 10),
-		reqFromSchedulerChan:  make(chan *types.Request, 10),
-		reqFromSpiderChan:     make(chan *types.Request, 10),
-		rspToSpiderChan:       make(chan *types.Response, 10),
-		itemFromSpiderChan:    make(chan *types.Item, 10),
-		reqToDownloaderChan:   make(chan *types.Request, 10),
-		rspFromDownloaderChan: make(chan *types.Response, 10),
-		itemToPipelineChan:    make(chan *types.Item, 10),
+		reqToSchedulerChan:    make(chan *types.Request, 100),
+		reqFromSchedulerChan:  make(chan *types.Request, 100),
+		reqFromSpiderChan:     make(chan *types.Request, 100),
+		rspToSpiderChan:       make(chan *types.Response, 100),
+		itemFromSpiderChan:    make(chan *types.Item, 100),
+		reqToDownloaderChan:   make(chan *types.Request, 100),
+		rspFromDownloaderChan: make(chan *types.Response, 100),
+		itemToPipelineChan:    make(chan *types.Item, 100),
 	}
 	e.scheduler = scheduler.NewScheduler(e.reqToSchedulerChan, e.reqFromSchedulerChan)
 	e.downloader = downloader.NewDownloader(e.reqToDownloaderChan, e.rspFromDownloaderChan)
@@ -93,8 +93,8 @@ func (e *Engine) Start() {
 		case req := <-e.reqFromSchedulerChan:
 			select {
 			case e.reqToDownloaderChan <- req:
-				log.Println("Warning: req -> downloader is full, discard!")
 			default:
+				log.Println("Warning: req -> downloader is full, discard!")
 			}
 		case rsp := <-e.rspFromDownloaderChan:
 			select {

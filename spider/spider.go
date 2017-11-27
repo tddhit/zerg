@@ -56,9 +56,11 @@ func (s *Spider) SetupChan(reqToEngineChan chan<- *types.Request,
 }
 
 func (s *Spider) Go() {
-	for req := range s.seeds {
-		s.reqToEngineChan <- req
-	}
+	go func() {
+		for req := range s.seeds {
+			s.reqToEngineChan <- req
+		}
+	}()
 	go func() {
 		for {
 			rsp := <-s.rspFromEngineChan
