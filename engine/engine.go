@@ -73,11 +73,15 @@ func (e *Engine) SetSchedulerPolicy(q Queuer) {
 func (e *Engine) AddDownloaderPolicy(c Crawler) {
 	e.downloader.AddCrawler(c)
 }
-
-func (e *Engine) SetPipelinePolicy(w Writer) {
-	e.pipeline.Add(w)
-}
 */
+
+func (e *Engine) AssociateWriter(spider *spider.Spider, writer pipeline.Writer) {
+	if spider != nil && writer != nil {
+		e.pipeline.AssociateWriter(spider.Name, writer)
+	} else {
+		util.LogFatal("spider or writer is nil!")
+	}
+}
 
 func (e *Engine) Start() {
 	e.scheduler.Go()

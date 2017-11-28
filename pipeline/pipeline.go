@@ -3,6 +3,7 @@ package pipeline
 import (
 	"github.com/tddhit/zerg/pipeline/writer"
 	"github.com/tddhit/zerg/types"
+	"github.com/tddhit/zerg/util"
 )
 
 type Writer interface {
@@ -10,23 +11,38 @@ type Writer interface {
 }
 
 type Pipeline struct {
-	Writer
+	writers            map[string]Writer
 	itemFromEngineChan <-chan *types.Item
 }
 
 func NewPipeline(itemFromEngineChan <-chan *types.Item) *Pipeline {
 	p := &Pipeline{
-		Writer:             writer.NewConsoleWriter(),
+		writers:            make(map[string]Writer),
 		itemFromEngineChan: itemFromEngineChan,
 	}
+	p.writers["DEFAULT_WRITER"] = writer.NewConsoleWriter()
 	return p
+}
+
+func (p *Pipeline) AssociateWriter(spiderName string, writer Writer) {
+	if _, ok := p.writers[spiderName]; !ok {
+		p.writers[spiderName] = writer
+	} else {
+		util.LogWarn("spider[%s] already has a writer!", spiderName)
+	}
 }
 
 func (p *Pipeline) Go() {
 	go func() {
 		for {
 			item := <-p.itemFromEngineChan
-			p.Write(item)
+			var writer Writer
+			if w, ok := p.writers[item.Spider]; ok {
+				writer = w
+			} else {
+				writer = p.writers["DEFAULT_WRITER"]
+			}
+			writer.Write(item)
 		}
 	}()
 }

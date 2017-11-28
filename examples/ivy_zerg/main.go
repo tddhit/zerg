@@ -5,22 +5,22 @@ import (
 	"github.com/tddhit/zerg/spider"
 	"github.com/tddhit/zerg/util"
 
-	"github.com/tddhit/zerg/examples/ivy_zerg/spider/cnblogs"
-	"github.com/tddhit/zerg/examples/ivy_zerg/spider/jobbole"
+	"github.com/tddhit/zerg/examples/ivy_zerg/pipeline"
+	"github.com/tddhit/zerg/examples/ivy_zerg/spider"
 )
 
 func main() {
 
-	jobboleSpider := spider.NewSpider("jobbole", jobbole.NewParser())
+	jobboleSpider := spider.NewSpider("jobbole", parser.NewJobboleParser())
 	jobboleSpider.AddSeed("http://blog.jobbole.com/all-posts/")
-	//jobboleSppider.AssociateWriter(pipeline.NewConsoleWriter())
 
-	cnblogsSpider := spider.NewSpider("cnblogs", cnblogs.NewParser())
+	cnblogsSpider := spider.NewSpider("cnblogs", parser.NewCnblogsParser())
 	cnblogsSpider.AddSeed("http://www.cnblogs.com")
-	//cnblogsSpider.AssociateWriter(pipeline.NewFileWriter())
 
 	engine := engine.NewEngine(util.Option{LogLevel: util.INFO})
 	engine.AddSpider(jobboleSpider).AddSpider(cnblogsSpider)
+	engine.AssociateWriter(jobboleSpider, writer.NewConsoleWriter())
+	engine.AssociateWriter(cnblogsSpider, writer.NewFileWriter("cnblogs.txt"))
 	//engine.SetSchedulerPolicy(scheduler.NewQueuer())
 	//engine.AddDownloaderPolicy(downloader.NewCrawler())
 	engine.Start()

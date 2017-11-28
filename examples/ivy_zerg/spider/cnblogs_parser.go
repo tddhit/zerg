@@ -1,4 +1,4 @@
-package cnblogs
+package parser
 
 import (
 	"github.com/PuerkitoBio/goquery"
@@ -7,14 +7,14 @@ import (
 
 const ROOTURL = "https://www.cnblogs.com/"
 
-type Parser struct {
+type CnblogsParser struct {
 }
 
-func NewParser() *Parser {
-	return &Parser{}
+func NewCnblogsParser() *CnblogsParser {
+	return &CnblogsParser{}
 }
 
-func (p *Parser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
+func (p *CnblogsParser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
 	item := types.NewItem()
 	reqs := make([]*types.Request, 0)
 	doc, _ := goquery.NewDocumentFromReader(rsp.Body)

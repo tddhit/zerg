@@ -11,6 +11,7 @@ const (
 	INFO
 	WARNING
 	ERROR
+	FATAL
 	PANIC
 )
 
@@ -21,7 +22,7 @@ func InitLogger(option Option) {
 	if option.LogPath != "" {
 		file, err := os.OpenFile(option.LogPath, os.O_APPEND|os.O_CREATE, 0666)
 		if err != nil {
-			LogError("%#v", err)
+			LogError("failed open file: %s, %s", option.LogPath, err)
 		} else {
 			logger = log.New(file, "", log.LstdFlags|log.Lshortfile)
 		}
@@ -34,7 +35,17 @@ func InitLogger(option Option) {
 func LogPanic(format string, v ...interface{}) {
 	if logLevel <= PANIC {
 		format = "[PANIC] " + format
+		s := fmt.Sprintf(format, v...)
+		logger.Output(2, s)
+		panic(s)
+	}
+}
+
+func LogFatal(format string, v ...interface{}) {
+	if logLevel <= FATAL {
+		format = "[FATAL] " + format
 		logger.Output(2, fmt.Sprintf(format, v...))
+		os.Exit(1)
 	}
 }
 

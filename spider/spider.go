@@ -36,12 +36,6 @@ func (s *Spider) AddSeed(url string) {
 	}
 }
 
-/*
-func (s *Spider) AssociateWriter(writer Writer) {
-	s.associatedWriter = writer
-}
-*/
-
 func (s *Spider) SetupChan(reqToEngineChan chan<- *types.Request,
 	itemToEngineChan chan<- *types.Item, rspFromEngineChan <-chan *types.Response) {
 	s.reqToEngineChan = reqToEngineChan

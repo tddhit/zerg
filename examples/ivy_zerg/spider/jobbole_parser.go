@@ -1,18 +1,18 @@
-package jobbole
+package parser
 
 import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/tddhit/zerg/types"
 )
 
-type Parser struct {
+type JobboleParser struct {
 }
 
-func NewParser() *Parser {
-	return &Parser{}
+func NewJobboleParser() *JobboleParser {
+	return &JobboleParser{}
 }
 
-func (p *Parser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
+func (p *JobboleParser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
 	item := types.NewItem()
 	reqs := make([]*types.Request, 0)
 	doc, _ := goquery.NewDocumentFromReader(rsp.Body)
