@@ -25,11 +25,9 @@ func NewScheduler(reqFromEngineChan <-chan *types.Request, reqToEngineChan chan<
 	return s
 }
 
-/*
 func (s *Scheduler) SetQueuer(q Queuer) {
 	s.Queuer = q
 }
-*/
 
 func (s *Scheduler) Go() {
 	go func() {

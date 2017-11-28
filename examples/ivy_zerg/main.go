@@ -5,8 +5,9 @@ import (
 	"github.com/tddhit/zerg/spider"
 	"github.com/tddhit/zerg/util"
 
-	"github.com/tddhit/zerg/examples/ivy_zerg/pipeline"
-	"github.com/tddhit/zerg/examples/ivy_zerg/spider"
+	"github.com/tddhit/zerg/examples/ivy_zerg/parser"
+	"github.com/tddhit/zerg/examples/ivy_zerg/queuer"
+	"github.com/tddhit/zerg/examples/ivy_zerg/writer"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 	engine.AddSpider(jobboleSpider).AddSpider(cnblogsSpider)
 	engine.AssociateWriter(jobboleSpider, writer.NewConsoleWriter())
 	engine.AssociateWriter(cnblogsSpider, writer.NewFileWriter("cnblogs.txt"))
-	//engine.SetSchedulerPolicy(scheduler.NewQueuer())
+	engine.SetSchedulerPolicy(queuer.NewChanQueuer())
 	//engine.AddDownloaderPolicy(downloader.NewCrawler())
 	engine.Start()
 }

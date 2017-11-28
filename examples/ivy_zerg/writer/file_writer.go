@@ -13,7 +13,7 @@ type FileWriter struct {
 }
 
 func NewFileWriter(filePath string) *FileWriter {
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		util.LogError("failed open file: %s, %s", filePath, err)
 		return nil

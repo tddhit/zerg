@@ -65,11 +65,15 @@ func (e *Engine) AddSpider(spider *spider.Spider) *Engine {
 	return e
 }
 
-/*
-func (e *Engine) SetSchedulerPolicy(q Queuer) {
-	e.scheduler = scheduler.SetQueuer(q)
+func (e *Engine) SetSchedulerPolicy(q scheduler.Queuer) {
+	if q != nil {
+		e.scheduler.SetQueuer(q)
+	} else {
+		util.LogPanic("queuer is nil!")
+	}
 }
 
+/*
 func (e *Engine) AddDownloaderPolicy(c Crawler) {
 	e.downloader.AddCrawler(c)
 }
