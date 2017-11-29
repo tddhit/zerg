@@ -111,7 +111,12 @@ func (e *Engine) Go() {
 			case e.reqToDownloaderChan <- req:
 				util.LogDebug("engine -> downloader, req:%s", req.RawURL)
 			default:
-				util.LogWarn("engine -> downloader, chan is full, discard %s!")
+				select {
+				case e.reqToSchedulerChan <- req:
+					util.LogWarn("engine -> downloader, chan is full, engine -> scheduler %s !", req.RawURL)
+				default:
+					util.LogWarn("engine -> downloader && engine -> scheduler, chan is full, discard %s !", req.RawURL)
+				}
 			}
 		case rsp := <-e.rspFromDownloaderChan:
 			if rsp != nil {

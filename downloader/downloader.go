@@ -1,8 +1,11 @@
 package downloader
 
 import (
+	"time"
+
 	"github.com/tddhit/zerg/downloader/crawler"
 	"github.com/tddhit/zerg/types"
+	"github.com/tddhit/zerg/util"
 )
 
 type Crawler interface {
@@ -28,12 +31,20 @@ func (d *Downloader) Go() {
 	go func() {
 		for {
 			req := <-d.reqFromEngineChan
-			rsp := d.Crawl(req)
-			if rsp != nil && rsp.Response.StatusCode == 200 {
-				rsp.RawURL = req.RawURL
-				rsp.Parser = req.Parser
-				d.rspToEngineChan <- rsp
-			}
+			go func(req *types.Request) {
+				start := time.Now()
+				rsp := d.Crawl(req)
+				end := time.Now()
+				elapsed := end.Sub(start)
+				if rsp != nil {
+					util.LogDebug("crawl %s(%s) spend %dms\n", req.RawURL, rsp.Response.Status, elapsed/1000000)
+					if rsp.Response.StatusCode == 200 {
+						rsp.RawURL = req.RawURL
+						rsp.Parser = req.Parser
+						d.rspToEngineChan <- rsp
+					}
+				}
+			}(req)
 		}
 	}()
 }

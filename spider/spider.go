@@ -1,6 +1,8 @@
 package spider
 
 import (
+	"time"
+
 	"github.com/tddhit/zerg/types"
 	"github.com/tddhit/zerg/util"
 )
@@ -64,10 +66,13 @@ func (s *Spider) Go() {
 			rsp := <-s.rspFromEngineChan
 			if rsp != nil {
 				if parser, ok := s.parsers[rsp.Parser]; ok {
+					start := time.Now()
 					item, reqs := parser.Parse(rsp)
+					end := time.Now()
+					elapsed := end.Sub(start)
+					util.LogDebug("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
 					if item != nil {
 						item.RawURL = rsp.RawURL
-						util.LogDebug("%s\n", item.Writer)
 						s.itemToEngineChan <- item
 					}
 					for _, req := range reqs {
