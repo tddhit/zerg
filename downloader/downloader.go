@@ -29,7 +29,11 @@ func (d *Downloader) Go() {
 		for {
 			req := <-d.reqFromEngineChan
 			rsp := d.Crawl(req)
-			d.rspToEngineChan <- rsp
+			if rsp != nil && rsp.Response.StatusCode == 200 {
+				rsp.RawURL = req.RawURL
+				rsp.Parser = req.Parser
+				d.rspToEngineChan <- rsp
+			}
 		}
 	}()
 }

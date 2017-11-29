@@ -7,23 +7,22 @@ import (
 type Request struct {
 	*http.Request
 	RawURL string
-	Spider string
+	Parser string
 }
 
 type Response struct {
 	*http.Response
 	RawURL string
-	Spider string
+	Parser string
 }
 
 type Item struct {
-	//associatedWriter Writer
 	Dict   map[string]string
 	RawURL string
-	Spider string
+	Writer string
 }
 
-func NewRequest(url, spiderName string) (*Request, error) {
+func NewRequest(url, parser string) (*Request, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -31,14 +30,15 @@ func NewRequest(url, spiderName string) (*Request, error) {
 	ireq := &Request{
 		Request: req,
 		RawURL:  url,
-		Spider:  spiderName,
+		Parser:  parser,
 	}
 	return ireq, nil
 }
 
-func NewItem() *Item {
+func NewItem(writer string) *Item {
 	i := &Item{
-		Dict: make(map[string]string),
+		Dict:   make(map[string]string),
+		Writer: writer,
 	}
 	return i
 }

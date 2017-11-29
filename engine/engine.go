@@ -10,7 +10,7 @@ import (
 )
 
 type Engine struct {
-	spiders    map[string]*spider.Spider
+	spider     *spider.Spider
 	scheduler  *scheduler.Scheduler
 	downloader *downloader.Downloader
 	pipeline   *pipeline.Pipeline
@@ -20,9 +20,9 @@ type Engine struct {
 	reqFromSchedulerChan chan *types.Request
 
 	//与spider通信
-	reqFromSpiderChans  map[string]chan *types.Request
-	rspToSpiderChans    map[string]chan *types.Response
-	itemFromSpiderChans map[string]chan *types.Item
+	reqFromSpiderChan  chan *types.Request
+	rspToSpiderChan    chan *types.Response
+	itemFromSpiderChan chan *types.Item
 
 	//与downloader通信
 	reqToDownloaderChan   chan *types.Request
@@ -34,12 +34,11 @@ type Engine struct {
 
 func NewEngine(option util.Option) *Engine {
 	e := &Engine{
-		spiders:               make(map[string]*spider.Spider),
 		reqToSchedulerChan:    make(chan *types.Request, 100),
 		reqFromSchedulerChan:  make(chan *types.Request, 100),
-		reqFromSpiderChans:    make(map[string]chan *types.Request),
-		rspToSpiderChans:      make(map[string]chan *types.Response),
-		itemFromSpiderChans:   make(map[string]chan *types.Item),
+		reqFromSpiderChan:     make(chan *types.Request, 100),
+		rspToSpiderChan:       make(chan *types.Response, 100),
+		itemFromSpiderChan:    make(chan *types.Item, 100),
 		reqToDownloaderChan:   make(chan *types.Request, 100),
 		rspFromDownloaderChan: make(chan *types.Response, 100),
 		itemToPipelineChan:    make(chan *types.Item, 100),
@@ -47,20 +46,16 @@ func NewEngine(option util.Option) *Engine {
 	e.scheduler = scheduler.NewScheduler(e.reqToSchedulerChan, e.reqFromSchedulerChan)
 	e.downloader = downloader.NewDownloader(e.reqToDownloaderChan, e.rspFromDownloaderChan)
 	e.pipeline = pipeline.NewPipeline(e.itemToPipelineChan)
+	e.spider = spider.NewSpider(e.reqFromSpiderChan, e.itemFromSpiderChan, e.rspToSpiderChan)
 	util.InitLogger(option)
 	return e
 }
 
-func (e *Engine) AddSpider(spider *spider.Spider) *Engine {
-	if _, ok := e.spiders[spider.Name]; !ok {
-		e.reqFromSpiderChans[spider.Name] = make(chan *types.Request, 100)
-		e.itemFromSpiderChans[spider.Name] = make(chan *types.Item, 100)
-		e.rspToSpiderChans[spider.Name] = make(chan *types.Response, 100)
-		spider.SetupChan(e.reqFromSpiderChans[spider.Name],
-			e.itemFromSpiderChans[spider.Name], e.rspToSpiderChans[spider.Name])
-		e.spiders[spider.Name] = spider
+func (e *Engine) AddParser(parser spider.Parser) *Engine {
+	if parser != nil {
+		e.spider.AddParser(parser)
 	} else {
-		util.LogWarn("spider[%s] is already exist!", spider.Name)
+		util.LogFatal("parser is nil!")
 	}
 	return e
 }
@@ -69,55 +64,47 @@ func (e *Engine) SetSchedulerPolicy(q scheduler.Queuer) {
 	if q != nil {
 		e.scheduler.SetQueuer(q)
 	} else {
-		util.LogPanic("queuer is nil!")
+		util.LogFatal("queuer is nil!")
 	}
 }
 
-/*
-func (e *Engine) AddDownloaderPolicy(c Crawler) {
-	e.downloader.AddCrawler(c)
-}
-*/
-
-func (e *Engine) AssociateWriter(spider *spider.Spider, writer pipeline.Writer) {
-	if spider != nil && writer != nil {
-		e.pipeline.AssociateWriter(spider.Name, writer)
+func (e *Engine) AddWriter(writer pipeline.Writer) *Engine {
+	if writer != nil {
+		e.pipeline.AddWriter(writer)
 	} else {
-		util.LogFatal("spider or writer is nil!")
+		util.LogFatal("writer is nil!")
 	}
+	return e
 }
 
-func (e *Engine) Start() {
+func (e *Engine) AddSeed(url, parser string) *Engine {
+	e.spider.AddSeed(url, parser)
+	return e
+}
+
+func (e *Engine) Go() {
 	e.scheduler.Go()
 	e.downloader.Go()
 	e.pipeline.Go()
-	for name, spider := range e.spiders {
-		spider.Go()
-		go func() {
-			for {
-				select {
-				case req := <-e.reqFromSpiderChans[name]:
-					util.LogDebug("spider[%s] -> engine, req:%s", name, req.RawURL)
-					select {
-					case e.reqToSchedulerChan <- req:
-						util.LogDebug("engine -> scheduler, req:%s", req.RawURL)
-					default:
-						util.LogWarn("engine -> scheduler, chan is full, discard %s!", req.RawURL)
-					}
-				case item := <-e.itemFromSpiderChans[name]:
-					util.LogDebug("spider[%s] -> engine, item:%s", name, item.RawURL)
-					select {
-					case e.itemToPipelineChan <- item:
-						util.LogDebug("engine -> pipeline, item:%s", item.RawURL)
-					default:
-						util.LogWarn("engine -> pipeline, chan is full, discard %s!", item.RawURL)
-					}
-				}
-			}
-		}()
-	}
+	e.spider.Go()
 	for {
 		select {
+		case req := <-e.reqFromSpiderChan:
+			util.LogDebug("spider -> engine, req:%s", req.RawURL)
+			select {
+			case e.reqToSchedulerChan <- req:
+				util.LogDebug("engine -> scheduler, req:%s", req.RawURL)
+			default:
+				util.LogWarn("engine -> scheduler, chan is full, discard %s!", req.RawURL)
+			}
+		case item := <-e.itemFromSpiderChan:
+			util.LogDebug("spider -> engine, item:%s", item.RawURL)
+			select {
+			case e.itemToPipelineChan <- item:
+				util.LogDebug("engine -> pipeline, item:%s", item.RawURL)
+			default:
+				util.LogWarn("engine -> pipeline, chan is full, discard %s!", item.RawURL)
+			}
 		case req := <-e.reqFromSchedulerChan:
 			util.LogDebug("scheduler -> engine, req:%s", req.RawURL)
 			select {
@@ -130,10 +117,10 @@ func (e *Engine) Start() {
 			if rsp != nil {
 				util.LogDebug("downloader -> engine, rsp:%s(%s)", rsp.RawURL, rsp.Status)
 				select {
-				case e.rspToSpiderChans[rsp.Spider] <- rsp:
-					util.LogDebug("engine -> spider[%s], rsp:%s", rsp.Spider, rsp.RawURL)
+				case e.rspToSpiderChan <- rsp:
+					util.LogDebug("engine -> spider, rsp:%s", rsp.RawURL)
 				default:
-					util.LogWarn("engine -> spider[%s], chan is full, discard %s!", rsp.Spider, rsp.RawURL)
+					util.LogWarn("engine -> spider, chan is full, discard %s!", rsp.RawURL)
 				}
 			}
 		}

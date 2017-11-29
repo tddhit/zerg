@@ -7,6 +7,7 @@ import (
 )
 
 type Writer interface {
+	Name() string
 	Write(item *types.Item)
 }
 
@@ -20,16 +21,17 @@ func NewPipeline(itemFromEngineChan <-chan *types.Item) *Pipeline {
 		writers:            make(map[string]Writer),
 		itemFromEngineChan: itemFromEngineChan,
 	}
-	p.writers["DEFAULT_WRITER"] = writer.NewConsoleWriter()
+	p.writers["DEFAULT_WRITER"] = writer.NewConsoleWriter("DEFAULT_WRITER")
 	return p
 }
 
-func (p *Pipeline) AssociateWriter(spiderName string, writer Writer) {
-	if _, ok := p.writers[spiderName]; !ok {
-		p.writers[spiderName] = writer
+func (p *Pipeline) AddWriter(writer Writer) *Pipeline {
+	if _, ok := p.writers[writer.Name()]; !ok {
+		p.writers[writer.Name()] = writer
 	} else {
-		util.LogWarn("spider[%s] already has a writer!", spiderName)
+		util.LogFatal("writer[%s] is already exist!", writer.Name())
 	}
+	return p
 }
 
 func (p *Pipeline) Go() {
@@ -37,7 +39,7 @@ func (p *Pipeline) Go() {
 		for {
 			item := <-p.itemFromEngineChan
 			var writer Writer
-			if w, ok := p.writers[item.Spider]; ok {
+			if w, ok := p.writers[item.Writer]; ok {
 				writer = w
 			} else {
 				writer = p.writers["DEFAULT_WRITER"]

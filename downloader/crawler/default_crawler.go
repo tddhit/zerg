@@ -27,8 +27,6 @@ func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	}
 	irsp := &types.Response{
 		Response: rsp,
-		RawURL:   req.RawURL,
-		Spider:   req.Spider,
 	}
 	return irsp
 }

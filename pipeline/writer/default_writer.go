@@ -8,11 +8,18 @@ import (
 )
 
 type ConsoleWriter struct {
+	name string
 }
 
-func NewConsoleWriter() *ConsoleWriter {
-	w := &ConsoleWriter{}
+func NewConsoleWriter(name string) *ConsoleWriter {
+	w := &ConsoleWriter{
+		name: name,
+	}
 	return w
+}
+
+func (w *ConsoleWriter) Name() string {
+	return w.name
 }
 
 func (w *ConsoleWriter) Write(item *types.Item) {
