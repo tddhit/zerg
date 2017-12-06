@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"strings"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/tddhit/zerg/types"
 )
@@ -22,15 +24,16 @@ func (p *DoubanParser) Name() string {
 }
 
 func (p *DoubanParser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
-	item := types.NewItem("")
+	item := types.NewItem("douban")
 	reqs := make([]*types.Request, 0)
 	doc, _ := goquery.NewDocumentFromReader(rsp.Body)
 	title := doc.Find("h1 span").Text()
 	if title != "" {
-		//content := doc.Find(".main-bd p").Text()
+		content := doc.Find(".main-bd p").Text()
+		content = strings.Join(strings.Fields(content), " ")
 		item.Dict["url"] = rsp.RawURL
 		item.Dict["title"] = title
-		//item.Dict["content"] = content
+		item.Dict["content"] = content
 	} else {
 		doc.Find(".main-bd h2 a").Each(func(i int, contentSelection *goquery.Selection) {
 			href, _ := contentSelection.Attr("href")
