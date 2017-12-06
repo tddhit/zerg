@@ -9,7 +9,7 @@ import (
 
 type Parser interface {
 	Name() string
-	Parse(rsp *types.Response) (*types.Item, []*types.Request)
+	Parse(rsp *types.Response) ([]*types.Item, []*types.Request)
 }
 
 type Spider struct {
@@ -67,13 +67,15 @@ func (s *Spider) Go() {
 			if rsp != nil {
 				if parser, ok := s.parsers[rsp.Parser]; ok {
 					start := time.Now()
-					item, reqs := parser.Parse(rsp)
+					items, reqs := parser.Parse(rsp)
 					end := time.Now()
 					elapsed := end.Sub(start)
 					util.LogDebug("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
-					if item != nil {
-						item.RawURL = rsp.RawURL
-						s.itemToEngineChan <- item
+					for _, item := range items {
+						if item != nil {
+							item.RawURL = rsp.RawURL
+							s.itemToEngineChan <- item
+						}
 					}
 					for _, req := range reqs {
 						if req != nil {

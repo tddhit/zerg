@@ -12,7 +12,7 @@ func main() {
 	doubanParser := parser.NewDoubanParser("douban")
 	doubanWriter := writer.NewFileWriter("douban", "douban.txt")
 
-	engine := engine.NewEngine(util.Option{LogLevel: util.INFO})
+	engine := engine.NewEngine(util.Option{LogLevel: util.DEBUG})
 	engine.AddParser(doubanParser)
 	engine.AddWriter(doubanWriter)
 	engine.AddSeed("https://movie.douban.com/review/best/", "douban")
