@@ -21,14 +21,16 @@ func (p *CnblogsParser) Name() string {
 	return p.name
 }
 
-func (p *CnblogsParser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
-	item := types.NewItem("cnblogs")
+func (p *CnblogsParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Request) {
+	items := make([]*types.Item, 0)
 	reqs := make([]*types.Request, 0)
 	doc, _ := goquery.NewDocumentFromReader(rsp.Body)
 	title := doc.Find("#cb_post_title_url").Text()
 	if title != "" {
+		item := types.NewItem("cnblogs")
 		item.Dict["url"] = rsp.RawURL
 		item.Dict["title"] = title
+		items = append(items, item)
 	} else {
 		doc.Find("#post_list .post_item_body h3 a").Each(func(i int, contentSelection *goquery.Selection) {
 			href, _ := contentSelection.Attr("href")
@@ -41,5 +43,5 @@ func (p *CnblogsParser) Parse(rsp *types.Response) (*types.Item, []*types.Reques
 			reqs = append(reqs, req)
 		})
 	}
-	return item, reqs
+	return items, reqs
 }

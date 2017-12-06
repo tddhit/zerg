@@ -23,17 +23,19 @@ func (p *DoubanParser) Name() string {
 	return p.name
 }
 
-func (p *DoubanParser) Parse(rsp *types.Response) (*types.Item, []*types.Request) {
-	item := types.NewItem("douban")
+func (p *DoubanParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Request) {
+	items := make([]*types.Item, 0)
 	reqs := make([]*types.Request, 0)
 	doc, _ := goquery.NewDocumentFromReader(rsp.Body)
 	title := doc.Find("h1 span").Text()
 	if title != "" {
 		content := doc.Find(".main-bd p").Text()
 		content = strings.Join(strings.Fields(content), " ")
+		item := types.NewItem("douban")
 		item.Dict["url"] = rsp.RawURL
 		item.Dict["title"] = title
 		item.Dict["content"] = content
+		items = append(items, item)
 	} else {
 		doc.Find(".main-bd h2 a").Each(func(i int, contentSelection *goquery.Selection) {
 			href, _ := contentSelection.Attr("href")
@@ -46,5 +48,5 @@ func (p *DoubanParser) Parse(rsp *types.Response) (*types.Item, []*types.Request
 			reqs = append(reqs, req)
 		})
 	}
-	return item, reqs
+	return items, reqs
 }
