@@ -27,7 +27,7 @@ func NewSpider(reqToEngineChan chan<- *types.Request,
 		reqToEngineChan:   reqToEngineChan,
 		itemToEngineChan:  itemToEngineChan,
 		rspFromEngineChan: rspFromEngineChan,
-		seeds:             make(chan *types.Request, 100),
+		seeds:             make(chan *types.Request, 1000),
 	}
 	return s
 }
@@ -66,25 +66,27 @@ func (s *Spider) Go() {
 			rsp := <-s.rspFromEngineChan
 			if rsp != nil {
 				if parser, ok := s.parsers[rsp.Parser]; ok {
-					start := time.Now()
-					items, reqs := parser.Parse(rsp)
-					rsp.Body.Close()
-					end := time.Now()
-					elapsed := end.Sub(start)
-					util.LogDebugf("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
-					for _, item := range items {
-						if item != nil {
-							item.RawURL = rsp.RawURL
-							s.itemToEngineChan <- item
-						}
-					}
-					for _, req := range reqs {
-						if req != nil {
-							if _, ok := s.parsers[req.Parser]; ok {
-								s.reqToEngineChan <- req
+					go func(rsp *types.Response) {
+						start := time.Now()
+						items, reqs := parser.Parse(rsp)
+						rsp.Body.Close()
+						end := time.Now()
+						elapsed := end.Sub(start)
+						util.LogDebugf("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
+						for _, item := range items {
+							if item != nil {
+								item.RawURL = rsp.RawURL
+								s.itemToEngineChan <- item
 							}
 						}
-					}
+						for _, req := range reqs {
+							if req != nil {
+								if _, ok := s.parsers[req.Parser]; ok {
+									s.reqToEngineChan <- req
+								}
+							}
+						}
+					}(rsp)
 				}
 			}
 		}

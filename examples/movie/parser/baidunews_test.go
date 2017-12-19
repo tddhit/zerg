@@ -17,7 +17,7 @@ const timeFormat = "2006-01-02 15:04"
 
 func TestExample(t *testing.T) {
 	{
-		doc, err := goquery.NewDocument("http://news.163.com/16/0511/07/BMP2VFA600014U9R.html")
+		doc, err := goquery.NewDocument("http://news.sina.com.cn/w/2017-12-06/doc-ifyphtze4856754.shtml")
 		if err != nil {
 			log.Fatal(err)
 		}

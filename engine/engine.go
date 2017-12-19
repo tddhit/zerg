@@ -3,6 +3,7 @@ package engine
 import (
 	"bufio"
 	"os"
+	"time"
 
 	"github.com/tddhit/zerg/downloader"
 	"github.com/tddhit/zerg/pipeline"
@@ -37,14 +38,14 @@ type Engine struct {
 
 func NewEngine(option util.Option) *Engine {
 	e := &Engine{
-		reqToSchedulerChan:    make(chan *types.Request, 100),
-		reqFromSchedulerChan:  make(chan *types.Request, 100),
-		reqFromSpiderChan:     make(chan *types.Request, 100),
-		rspToSpiderChan:       make(chan *types.Response, 100),
-		itemFromSpiderChan:    make(chan *types.Item, 100),
-		reqToDownloaderChan:   make(chan *types.Request, 100),
-		rspFromDownloaderChan: make(chan *types.Response, 100),
-		itemToPipelineChan:    make(chan *types.Item, 100),
+		reqToSchedulerChan:    make(chan *types.Request, 1000),
+		reqFromSchedulerChan:  make(chan *types.Request, 1000),
+		reqFromSpiderChan:     make(chan *types.Request, 1000),
+		rspToSpiderChan:       make(chan *types.Response, 1000),
+		itemFromSpiderChan:    make(chan *types.Item, 1000),
+		reqToDownloaderChan:   make(chan *types.Request, 1000),
+		rspFromDownloaderChan: make(chan *types.Response, 1000),
+		itemToPipelineChan:    make(chan *types.Item, 1000),
 	}
 	e.scheduler = scheduler.NewScheduler(e.reqToSchedulerChan, e.reqFromSchedulerChan)
 	e.downloader = downloader.NewDownloader(e.reqToDownloaderChan, e.rspFromDownloaderChan)
@@ -98,8 +99,8 @@ func (e *Engine) addSeedByFile(path, parser string) *Engine {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		data := scanner.Text()
-		util.LogDebugf(data)
 		e.spider.AddSeed(data, parser)
+		time.Sleep(time.Millisecond * 20)
 	}
 	return e
 }
