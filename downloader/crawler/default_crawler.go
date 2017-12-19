@@ -22,7 +22,7 @@ func NewHTTPCrawler() *HTTPCrawler {
 func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	rsp, err := c.Do(req.Request)
 	if err != nil {
-		util.LogError("Failed Crawl %s %s\n!", req.RawURL, err)
+		util.LogErrorf("Failed Crawl %s %s\n!", req.RawURL, err)
 		return nil
 	}
 	irsp := &types.Response{

@@ -27,6 +27,7 @@ func NewRequest(url, parser string) (*Request, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Connection", "close")
 	ireq := &Request{
 		Request: req,
 		RawURL:  url,

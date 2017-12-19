@@ -10,18 +10,24 @@ import (
 
 type FileWriter struct {
 	*os.File
+	name string
 }
 
-func NewFileWriter(filePath string) *FileWriter {
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
+func NewFileWriter(name, filePath string) *FileWriter {
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
-		util.LogErrorf("failed open file: %s, %s", filePath, err)
+		util.LogError("failed open file: %s, %s", filePath, err)
 		return nil
 	}
 	w := &FileWriter{
 		File: file,
+		name: name,
 	}
 	return w
+}
+
+func (w *FileWriter) Name() string {
+	return w.name
 }
 
 func (w *FileWriter) Write(item *types.Item) {

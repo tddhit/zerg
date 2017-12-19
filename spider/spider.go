@@ -36,7 +36,7 @@ func (s *Spider) AddParser(parser Parser) *Spider {
 	if _, ok := s.parsers[parser.Name()]; !ok {
 		s.parsers[parser.Name()] = parser
 	} else {
-		util.LogWarn("parser[%s] is already exist!", parser.Name())
+		util.LogWarnf("parser[%s] is already exist!", parser.Name())
 	}
 	return s
 }
@@ -45,8 +45,8 @@ func (s *Spider) AddSeed(url, parser string) *Spider {
 	req, _ := types.NewRequest(url, parser)
 	select {
 	case s.seeds <- req:
-	default:
-		util.LogWarn("spider -> engine, chan is full, discard %s!", req.RawURL)
+		//default:
+		//	util.LogWarnf("spider -> engine, chan is full, discard %s!", req.RawURL)
 	}
 	return s
 }
@@ -68,9 +68,10 @@ func (s *Spider) Go() {
 				if parser, ok := s.parsers[rsp.Parser]; ok {
 					start := time.Now()
 					items, reqs := parser.Parse(rsp)
+					rsp.Body.Close()
 					end := time.Now()
 					elapsed := end.Sub(start)
-					util.LogDebug("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
+					util.LogDebugf("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
 					for _, item := range items {
 						if item != nil {
 							item.RawURL = rsp.RawURL

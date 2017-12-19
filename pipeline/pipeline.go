@@ -29,7 +29,7 @@ func (p *Pipeline) AddWriter(writer Writer) *Pipeline {
 	if _, ok := p.writers[writer.Name()]; !ok {
 		p.writers[writer.Name()] = writer
 	} else {
-		util.LogFatal("writer[%s] is already exist!", writer.Name())
+		util.LogFatalf("writer[%s] is already exist!", writer.Name())
 	}
 	return p
 }
