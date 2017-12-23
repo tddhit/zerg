@@ -4,7 +4,7 @@ import (
 	"github.com/tddhit/zerg/engine"
 	"github.com/tddhit/zerg/examples/movie/parser"
 	"github.com/tddhit/zerg/examples/movie/writer"
-	"github.com/tddhit/zerg/util"
+	"github.com/tddhit/tools/log"
 )
 
 func main() {

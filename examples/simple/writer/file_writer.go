@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/tddhit/zerg/types"
-	"github.com/tddhit/zerg/util"
+	"github.com/tddhit/tools/log"
 )
 
 type FileWriter struct {
@@ -16,7 +16,7 @@ type FileWriter struct {
 func NewFileWriter(name, filePath string) *FileWriter {
 	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
-		util.LogError("failed open file: %s, %s", filePath, err)
+		log.Error("failed open file: %s, %s", filePath, err)
 		return nil
 	}
 	w := &FileWriter{

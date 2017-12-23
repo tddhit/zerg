@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/tddhit/zerg/engine"
-	"github.com/tddhit/zerg/util"
+	"github.com/tddhit/tools/log"
 
 	"github.com/tddhit/zerg/examples/douban/parser"
 	"github.com/tddhit/zerg/examples/douban/queuer"

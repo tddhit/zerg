@@ -3,7 +3,7 @@ package pipeline
 import (
 	"github.com/tddhit/zerg/pipeline/writer"
 	"github.com/tddhit/zerg/types"
-	"github.com/tddhit/zerg/util"
+	"github.com/tddhit/tools/log"
 )
 
 type Writer interface {
@@ -29,7 +29,7 @@ func (p *Pipeline) AddWriter(writer Writer) *Pipeline {
 	if _, ok := p.writers[writer.Name()]; !ok {
 		p.writers[writer.Name()] = writer
 	} else {
-		util.LogFatalf("writer[%s] is already exist!", writer.Name())
+		log.Fatalf("writer[%s] is already exist!", writer.Name())
 	}
 	return p
 }

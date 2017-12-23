@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/tddhit/zerg/types"
-	"github.com/tddhit/zerg/util"
+	"github.com/tddhit/tools/log"
 )
 
 type Parser interface {
@@ -36,7 +36,7 @@ func (s *Spider) AddParser(parser Parser) *Spider {
 	if _, ok := s.parsers[parser.Name()]; !ok {
 		s.parsers[parser.Name()] = parser
 	} else {
-		util.LogWarnf("parser[%s] is already exist!", parser.Name())
+		log.Warnf("parser[%s] is already exist!", parser.Name())
 	}
 	return s
 }
@@ -46,7 +46,7 @@ func (s *Spider) AddSeed(url, parser string) *Spider {
 	select {
 	case s.seeds <- req:
 		//default:
-		//	util.LogWarnf("spider -> engine, chan is full, discard %s!", req.RawURL)
+		//	log.Warnf("spider -> engine, chan is full, discard %s!", req.RawURL)
 	}
 	return s
 }
@@ -72,7 +72,7 @@ func (s *Spider) Go() {
 						rsp.Body.Close()
 						end := time.Now()
 						elapsed := end.Sub(start)
-						util.LogDebugf("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
+						log.Debugf("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
 						for _, item := range items {
 							if item != nil {
 								item.RawURL = rsp.RawURL
