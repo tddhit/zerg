@@ -24,6 +24,9 @@ func (p *BaiduNewsParser) Name() string {
 func (p *BaiduNewsParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Request) {
 	var reqs []*types.Request
 	doc, _ := goquery.NewDocumentFromReader(rsp.Body)
+	if doc == nil {
+		return nil, nil
+	}
 	doc.Find(".result .c-title a").Each(func(i int, contentSelection *goquery.Selection) {
 		href, _ := contentSelection.Attr("href")
 		req, _ := types.NewRequest(href, "full")
