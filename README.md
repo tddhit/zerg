@@ -1,4 +1,4 @@
-![PIC](https://github.com/tddhit/zerg/tree/master/doc/cishe.jpeg)
+![](https://github.com/tddhit/zerg/tree/master/doc/cishe.png)
 # A Spider(垂直型爬虫)
 - 支持多站点爬取(实现parser)
 - 支持自定义调度策略(实现queuer)
