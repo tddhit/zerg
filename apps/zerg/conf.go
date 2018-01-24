@@ -14,6 +14,7 @@ type Conf struct {
 
 type Parser struct {
 	CssSelector string `json:"cssSelector"`
+	Parser      string `json:"parser"`
 	Writer      string `json:"writer"`
 	Type        string `json:"type"`
 }

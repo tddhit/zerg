@@ -6,6 +6,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/saintfish/chardet"
+	"github.com/tddhit/tools/log"
 	"github.com/tddhit/zerg/types"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
@@ -16,14 +17,16 @@ type Parser struct {
 	typ         string
 	cssSelector string
 	writer      string
+	parser      string
 }
 
-func NewParser(name, typ, cssSelector, writer string) *Parser {
+func NewParser(name, typ, cssSelector, writer, parser string) *Parser {
 	return &Parser{
 		name:        name,
 		typ:         typ,
 		cssSelector: cssSelector,
 		writer:      writer,
+		parser:      parser,
 	}
 }
 
@@ -48,9 +51,10 @@ func (p *Parser) parseHref(rsp *types.Response) []*types.Request {
 	if doc == nil {
 		return nil
 	}
-	doc.Find(".result .c-title a").Each(func(i int, contentSelection *goquery.Selection) {
+	doc.Find(p.cssSelector).Each(func(i int, contentSelection *goquery.Selection) {
 		href, _ := contentSelection.Attr("href")
-		req, _ := types.NewRequest(href, "full")
+		log.Debug(href)
+		req, _ := types.NewRequest(href, p.parser)
 		reqs = append(reqs, req)
 	})
 	return reqs
