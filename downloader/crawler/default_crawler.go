@@ -1,6 +1,7 @@
 package crawler
 
 import (
+	"crypto/tls"
 	"net/http"
 
 	"github.com/tddhit/tools/log"
@@ -13,7 +14,13 @@ type HTTPCrawler struct {
 }
 
 func NewHTTPCrawler() *HTTPCrawler {
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
+		DisableCompression: true,
+	}
+	client := &http.Client{
+		Transport: tr,
+	}
 	crawler := &HTTPCrawler{
 		Client: client,
 	}

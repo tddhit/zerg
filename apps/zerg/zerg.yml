@@ -1,0 +1,14 @@
+parser:
+  href:
+    cssselector: .result .c-title a
+    writer: ""
+    type: href
+  text:
+    cssselector: p
+    writer: tv
+    type: text
+writer:
+  tv: data/tv.txt
+seed:
+  file: data/seed.txt
+  parser: href
