@@ -3,6 +3,7 @@ package crawler
 import (
 	"crypto/tls"
 	"net/http"
+	"net/url"
 
 	"github.com/tddhit/tools/log"
 
@@ -10,25 +11,24 @@ import (
 )
 
 type HTTPCrawler struct {
-	*http.Client
 }
 
-func NewHTTPCrawler() *HTTPCrawler {
+func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	tr := &http.Transport{
 		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
 		DisableCompression: true,
 	}
+	if req.Proxy != "" {
+		proxy, err := url.Parse(req.Proxy)
+		if err != nil {
+			return nil
+		}
+		tr.Proxy = http.ProxyURL(proxy)
+	}
 	client := &http.Client{
 		Transport: tr,
 	}
-	crawler := &HTTPCrawler{
-		Client: client,
-	}
-	return crawler
-}
-
-func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
-	rsp, err := c.Do(req.Request)
+	rsp, err := client.Do(req.Request)
 	if err != nil {
 		log.Errorf("Failed Crawl %s %s\n!", req.RawURL, err)
 		return nil

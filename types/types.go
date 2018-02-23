@@ -8,6 +8,7 @@ type Request struct {
 	*http.Request
 	RawURL string
 	Parser string
+	Proxy  string
 }
 
 type Response struct {
@@ -22,7 +23,7 @@ type Item struct {
 	Writer string
 }
 
-func NewRequest(url, parser string) (*Request, error) {
+func NewRequest(url, parser, proxy string) (*Request, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -32,6 +33,7 @@ func NewRequest(url, parser string) (*Request, error) {
 		Request: req,
 		RawURL:  url,
 		Parser:  parser,
+		Proxy:   proxy,
 	}
 	return ireq, nil
 }

@@ -42,7 +42,6 @@ type Engine struct {
 }
 
 func NewEngine(option Option) *Engine {
-	log.Debug("!!!!")
 	e := &Engine{
 		reqToSchedulerChan:    make(chan *types.Request, 1000),
 		reqFromSchedulerChan:  make(chan *types.Request, 1000),
@@ -53,14 +52,11 @@ func NewEngine(option Option) *Engine {
 		rspFromDownloaderChan: make(chan *types.Response, 1000),
 		itemToPipelineChan:    make(chan *types.Item, 1000),
 	}
-	log.Debug("!!!!")
 	e.scheduler = scheduler.NewScheduler(e.reqToSchedulerChan, e.reqFromSchedulerChan)
 	e.downloader = downloader.NewDownloader(e.reqToDownloaderChan, e.rspFromDownloaderChan)
 	e.pipeline = pipeline.NewPipeline(e.itemToPipelineChan)
 	e.spider = spider.NewSpider(e.reqFromSpiderChan, e.itemFromSpiderChan, e.rspToSpiderChan)
-	log.Debug("!!!!")
 	log.Init(option.LogPath, option.LogLevel)
-	log.Debug("!!!!")
 	return e
 }
 
@@ -90,8 +86,8 @@ func (e *Engine) AddWriter(writer pipeline.Writer) *Engine {
 	return e
 }
 
-func (e *Engine) AddSeed(url, parser string) *Engine {
-	e.spider.AddSeed(url, parser)
+func (e *Engine) AddSeed(url, parser, proxy string) *Engine {
+	e.spider.AddSeed(url, parser, proxy)
 	return e
 }
 
@@ -108,7 +104,7 @@ func (e *Engine) addSeedByFile(path, parser string) *Engine {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		data := scanner.Text()
-		e.spider.AddSeed(data, parser)
+		e.spider.AddSeed(data, parser, "")
 		time.Sleep(time.Millisecond * 20)
 	}
 	return e

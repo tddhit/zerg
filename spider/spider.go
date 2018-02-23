@@ -3,8 +3,8 @@ package spider
 import (
 	"time"
 
-	"github.com/tddhit/zerg/types"
 	"github.com/tddhit/tools/log"
+	"github.com/tddhit/zerg/types"
 )
 
 type Parser interface {
@@ -41,8 +41,8 @@ func (s *Spider) AddParser(parser Parser) *Spider {
 	return s
 }
 
-func (s *Spider) AddSeed(url, parser string) *Spider {
-	req, _ := types.NewRequest(url, parser)
+func (s *Spider) AddSeed(url, parser, proxy string) *Spider {
+	req, _ := types.NewRequest(url, parser, proxy)
 	select {
 	case s.seeds <- req:
 		//default:

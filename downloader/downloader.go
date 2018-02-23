@@ -21,7 +21,7 @@ type Downloader struct {
 
 func NewDownloader(reqFromEngineChan <-chan *types.Request, rspToEngineChan chan<- *types.Response) *Downloader {
 	d := &Downloader{
-		Crawler:           crawler.NewHTTPCrawler(),
+		Crawler:           &crawler.HTTPCrawler{},
 		reqFromEngineChan: reqFromEngineChan,
 		rspToEngineChan:   rspToEngineChan,
 	}
