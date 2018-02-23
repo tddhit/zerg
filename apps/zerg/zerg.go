@@ -24,12 +24,12 @@ type program struct {
 
 func newProgram(conf *Conf) *program {
 	p := &program{
-		engine: engine.NewEngine(engine.Option{LogLevel: log.WARNING}),
+		engine: engine.NewEngine(engine.Option{LogLevel: log.DEBUG}),
 		parser: make(map[string]*parser.Parser),
 		writer: make(map[string]*writer.FileWriter),
 	}
 	for k, v := range conf.Parser {
-		p.parser[k] = parser.NewParser(k, v.Type, v.CssSelector, v.Writer)
+		p.parser[k] = parser.NewParser(k, v.Type, v.CssSelector, v.Writer, v.Parser)
 		p.engine.AddParser(p.parser[k])
 	}
 	for k, v := range conf.Writer {

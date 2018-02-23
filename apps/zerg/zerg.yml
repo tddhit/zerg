@@ -1,14 +1,16 @@
 parser:
-  href:
-    cssselector: .result .c-title a
+  baiduHref:
+    cssselector: .c-container .t a
+    parser: newsText
     writer: ""
     type: href
-  text:
+  newsText:
     cssselector: p
+    parser: ""
     writer: tv
     type: text
 writer:
-  tv: data/tv.txt
+  tv: tv.txt
 seed:
-  file: data/seed.txt
-  parser: href
+  file: seed.txt
+  parser: baiduHref

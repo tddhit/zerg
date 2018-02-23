@@ -12,11 +12,12 @@ func TestConf(t *testing.T) {
 		Parser: make(map[string]Parser),
 		Writer: make(map[string]string),
 	}
-	c.Parser["href"] = Parser{
+	c.Parser["baiduHref"] = Parser{
 		CssSelector: ".result .c-title a",
 		Type:        "href",
+		Parser:      "newsText",
 	}
-	c.Parser["text"] = Parser{
+	c.Parser["newsText"] = Parser{
 		CssSelector: "p",
 		Writer:      "tv",
 		Type:        "text",
@@ -24,7 +25,7 @@ func TestConf(t *testing.T) {
 	c.Writer["tv"] = "data/tv.txt"
 	c.Seed = Seed{
 		File:   "data/seed.txt",
-		Parser: "href",
+		Parser: "baiduHref",
 	}
 	out, _ := yaml.Marshal(c)
 	fmt.Println(string(out))
