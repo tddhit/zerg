@@ -2,8 +2,10 @@ package crawler
 
 import (
 	"crypto/tls"
+	"net"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/tddhit/tools/log"
 
@@ -17,6 +19,10 @@ func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	tr := &http.Transport{
 		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
 		DisableCompression: true,
+		DisableKeepAlives:  true,
+		Dial: (&net.Dialer{
+			Timeout: 2000 * time.Millisecond,
+		}).Dial,
 	}
 	if req.Proxy != "" {
 		proxy, err := url.Parse(req.Proxy)
@@ -27,6 +33,7 @@ func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	}
 	client := &http.Client{
 		Transport: tr,
+		Timeout:   5000 * time.Millisecond,
 	}
 	rsp, err := client.Do(req.Request)
 	if err != nil {

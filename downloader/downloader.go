@@ -43,6 +43,8 @@ func (d *Downloader) Go() {
 						rsp.RawURL = req.RawURL
 						rsp.Parser = req.Parser
 						d.rspToEngineChan <- rsp
+					} else {
+						rsp.Body.Close()
 					}
 				}
 			}(req)
