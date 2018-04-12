@@ -99,7 +99,7 @@ func (e *Engine) AddSeedByFile(path, parser string) *Engine {
 func (e *Engine) addSeedByFile(path, parser string) *Engine {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatalf("AddSeedByFile fail:", err)
+		log.Fatal("AddSeedByFile fail:", err)
 	}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {

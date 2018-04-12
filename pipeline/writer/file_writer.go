@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/tddhit/zerg/types"
 	"github.com/tddhit/tools/log"
+	"github.com/tddhit/zerg/types"
 )
 
 type FileWriter struct {
@@ -30,7 +30,7 @@ func (w *FileWriter) Write(item *types.Item) {
 	for key, value := range item.Dict {
 		buf.WriteString(key)
 		buf.WriteString("=")
-		buf.WriteString(value)
+		buf.WriteString(value.(string))
 		buf.WriteString("\t")
 		count++
 	}

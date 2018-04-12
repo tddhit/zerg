@@ -1,6 +1,6 @@
 parser:
   baiduHref:
-    cssselector: .c-container .t a
+    cssselector: .result .c-title a
     parser: newsText
     writer: ""
     type: href
@@ -10,7 +10,7 @@ parser:
     writer: tv
     type: text
 writer:
-  tv: tv.txt
+  tv: data/tv.txt
 seed:
-  file: seed.txt
+  file: data/seed_tv.txt
   parser: baiduHref

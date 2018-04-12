@@ -18,7 +18,7 @@ type Response struct {
 }
 
 type Item struct {
-	Dict   map[string]string
+	Dict   map[string]interface{}
 	RawURL string
 	Writer string
 }
@@ -40,7 +40,7 @@ func NewRequest(url, parser, proxy string) (*Request, error) {
 
 func NewItem(writer string) *Item {
 	i := &Item{
-		Dict:   make(map[string]string),
+		Dict:   make(map[string]interface{}),
 		Writer: writer,
 	}
 	return i
