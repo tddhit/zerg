@@ -36,7 +36,7 @@ func (w *FileWriter) Write(item *types.Item) {
 	for key, value := range item.Dict {
 		buf.WriteString(key)
 		buf.WriteString("=")
-		buf.WriteString(value)
+		buf.WriteString(value.(string))
 		buf.WriteString("\t")
 		count++
 	}
