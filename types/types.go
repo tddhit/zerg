@@ -23,10 +23,13 @@ type Item struct {
 	Writer string
 }
 
-func NewRequest(url, parser, proxy string) (*Request, error) {
+func NewRequest(url, parser, proxy string, header http.Header) (*Request, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
+	}
+	if header != nil {
+		req.Header = header
 	}
 	req.Header.Set("Connection", "close")
 	ireq := &Request{

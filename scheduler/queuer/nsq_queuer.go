@@ -58,7 +58,7 @@ func (q *NsqQueuer) Pop() (req *types.Request) {
 			log.Error(err)
 			continue
 		}
-		req, err := types.NewRequest(jsonMsg.URL, jsonMsg.Parser, jsonMsg.Proxy)
+		req, err := types.NewRequest(jsonMsg.URL, jsonMsg.Parser, jsonMsg.Proxy, nil)
 		if err != nil {
 			log.Error(err)
 			continue

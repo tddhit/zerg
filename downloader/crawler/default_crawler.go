@@ -33,7 +33,7 @@ func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	}
 	client := &http.Client{
 		Transport: tr,
-		Timeout:   5000 * time.Millisecond,
+		Timeout:   15000 * time.Millisecond,
 	}
 	rsp, err := client.Do(req.Request)
 	if err != nil {

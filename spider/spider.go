@@ -1,6 +1,7 @@
 package spider
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/tddhit/tools/log"
@@ -41,8 +42,8 @@ func (s *Spider) AddParser(parser Parser) *Spider {
 	return s
 }
 
-func (s *Spider) AddSeed(url, parser, proxy string) *Spider {
-	req, _ := types.NewRequest(url, parser, proxy)
+func (s *Spider) AddSeed(url, parser, proxy string, header http.Header) *Spider {
+	req, _ := types.NewRequest(url, parser, proxy, header)
 	select {
 	case s.seeds <- req:
 		//default:
