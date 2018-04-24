@@ -28,8 +28,10 @@ func NewRequest(url, parser, proxy string, header http.Header) (*Request, error)
 	if err != nil {
 		return nil, err
 	}
-	if header != nil {
-		req.Header = header
+	for k, v1 := range header {
+		for _, v2 := range v1 {
+			req.Header.Add(k, v2)
+		}
 	}
 	req.Header.Set("Connection", "close")
 	ireq := &Request{

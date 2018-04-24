@@ -26,13 +26,13 @@ func (p *NeteaseAlbumParser) Name() string {
 }
 
 func (p *NeteaseAlbumParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Request) {
-	log.Info(rsp.RawURL)
 	var reqs []*types.Request
 	doc, err := goquery.NewDocumentFromReader(rsp.Body)
 	if doc == nil {
 		log.Error(rsp.RawURL, err)
 		return nil, nil
 	}
+	log.Info(rsp.RawURL)
 	doc.Find("#m-song-module li p a").Each(func(i int, contentSelection *goquery.Selection) {
 		href, _ := contentSelection.Attr("href")
 		v := strings.Split(href, "?")
@@ -42,7 +42,7 @@ func (p *NeteaseAlbumParser) Parse(rsp *types.Response) ([]*types.Item, []*types
 		}
 		req, _ := types.NewRequest(ALBUM_ROOTURL+v[1], "NeteaseMusicParser", "", header.Header)
 		reqs = append(reqs, req)
-		//log.Info(ALBUM_ROOTURL+v[1], "NeteaseMusicParser")
+		log.Info(ALBUM_ROOTURL+v[1], "NeteaseMusicParser")
 	})
 	doc.Find(".u-page .znxt").Each(func(i int, contentSelection *goquery.Selection) {
 		href, _ := contentSelection.Attr("href")
@@ -53,7 +53,7 @@ func (p *NeteaseAlbumParser) Parse(rsp *types.Response) ([]*types.Item, []*types
 		}
 		req, _ := types.NewRequest(ARTIST_ROOTURL+v[1], "NeteaseAlbumParser", "", header.Header)
 		reqs = append(reqs, req)
-		//log.Info(ARTIST_ROOTURL+v[1], "NeteaseAlbumParser")
+		log.Info(ARTIST_ROOTURL+v[1], "NeteaseAlbumParser")
 	})
 	return nil, reqs
 }

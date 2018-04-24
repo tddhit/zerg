@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/PuerkitoBio/goquery"
+	"github.com/tddhit/tools/log"
 	"github.com/tddhit/zerg/types"
 )
 
@@ -23,10 +24,12 @@ func (p *NeteaseMusicParser) Name() string {
 
 func (p *NeteaseMusicParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Request) {
 	var items []*types.Item
-	doc, _ := goquery.NewDocumentFromReader(rsp.Body)
+	doc, err := goquery.NewDocumentFromReader(rsp.Body)
 	if doc == nil {
+		log.Error(rsp.RawURL, err)
 		return nil, nil
 	}
+	log.Info(rsp.RawURL)
 	artist := doc.Find(".intr span").Text()
 	doc.Find(".f-hide li a").Each(func(i int, contentSelection *goquery.Selection) {
 		musicName := contentSelection.Text()
