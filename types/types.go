@@ -1,6 +1,7 @@
 package types
 
 import (
+	"io"
 	"net/http"
 )
 
@@ -23,8 +24,10 @@ type Item struct {
 	Writer string
 }
 
-func NewRequest(url, parser, proxy string, header http.Header) (*Request, error) {
-	req, err := http.NewRequest("GET", url, nil)
+func NewRequest(method, url string, body io.Reader,
+	parser, proxy string, header http.Header) (*Request, error) {
+
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}

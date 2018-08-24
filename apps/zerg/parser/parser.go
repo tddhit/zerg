@@ -54,7 +54,7 @@ func (p *Parser) parseHref(rsp *types.Response) []*types.Request {
 	doc.Find(p.cssSelector).Each(func(i int, contentSelection *goquery.Selection) {
 		href, _ := contentSelection.Attr("href")
 		log.Debug(href)
-		req, _ := types.NewRequest(href, p.parser, "", nil)
+		req, _ := types.NewRequest("GET", href, nil, p.parser, "", nil)
 		reqs = append(reqs, req)
 	})
 	return reqs

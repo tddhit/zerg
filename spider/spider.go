@@ -1,6 +1,7 @@
 package spider
 
 import (
+	"io"
 	"net/http"
 	"time"
 
@@ -42,8 +43,10 @@ func (s *Spider) AddParser(parser Parser) *Spider {
 	return s
 }
 
-func (s *Spider) AddSeed(url, parser, proxy string, header http.Header) *Spider {
-	req, _ := types.NewRequest(url, parser, proxy, header)
+func (s *Spider) AddSeed(method, url string, body io.Reader,
+	parser, proxy string, header http.Header) *Spider {
+
+	req, _ := types.NewRequest(method, url, body, parser, proxy, header)
 	select {
 	case s.seeds <- req:
 		//default:
