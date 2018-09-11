@@ -1,9 +1,9 @@
 package pipeline
 
 import (
+	"github.com/tddhit/tools/log"
 	"github.com/tddhit/zerg/pipeline/writer"
 	"github.com/tddhit/zerg/types"
-	"github.com/tddhit/tools/log"
 )
 
 type Writer interface {

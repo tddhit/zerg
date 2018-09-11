@@ -7,9 +7,10 @@ import (
 
 type Request struct {
 	*http.Request
-	RawURL string
-	Parser string
-	Proxy  string
+	RawURL  string
+	Parser  string
+	Proxy   string
+	Crawler string
 }
 
 type Response struct {
@@ -25,7 +26,7 @@ type Item struct {
 }
 
 func NewRequest(method, url string, body io.Reader,
-	parser, proxy string, header http.Header) (*Request, error) {
+	parser, proxy string, header http.Header, crawler string) (*Request, error) {
 
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
@@ -42,6 +43,7 @@ func NewRequest(method, url string, body io.Reader,
 		RawURL:  url,
 		Parser:  parser,
 		Proxy:   proxy,
+		Crawler: crawler,
 	}
 	return ireq, nil
 }

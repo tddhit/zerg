@@ -100,6 +100,15 @@ func (e *Engine) AddSeedByFile(path, parser string) *Engine {
 	return e
 }
 
+func (e *Engine) AddCrawler(crawler downloader.Crawler) *Engine {
+	if crawler != nil {
+		e.downloader.AddCrawler(crawler)
+	} else {
+		log.Fatalf("crawler is nil!")
+	}
+	return e
+}
+
 func (e *Engine) addSeedByFile(path, parser string) *Engine {
 	file, err := os.Open(path)
 	if err != nil {

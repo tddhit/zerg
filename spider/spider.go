@@ -46,7 +46,7 @@ func (s *Spider) AddParser(parser Parser) *Spider {
 func (s *Spider) AddSeed(method, url string, body io.Reader,
 	parser, proxy string, header http.Header) *Spider {
 
-	req, _ := types.NewRequest(method, url, body, parser, proxy, header)
+	req, _ := types.NewRequest(method, url, body, parser, proxy, header, "")
 	select {
 	case s.seeds <- req:
 		//default:

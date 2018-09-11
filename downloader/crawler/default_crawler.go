@@ -15,6 +15,10 @@ import (
 type HTTPCrawler struct {
 }
 
+func (c *HTTPCrawler) Name() string {
+	return "DEFAULT_HTTPCrawler"
+}
+
 func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	tr := &http.Transport{
 		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
