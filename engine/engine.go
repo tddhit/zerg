@@ -2,8 +2,6 @@ package engine
 
 import (
 	"bufio"
-	"io"
-	"net/http"
 	"os"
 	"time"
 
@@ -88,10 +86,13 @@ func (e *Engine) AddWriter(writer pipeline.Writer) *Engine {
 	return e
 }
 
-func (e *Engine) AddSeed(method, url string, body io.Reader,
-	parser, proxy string, header http.Header) *Engine {
+func (e *Engine) AddSeed(url, parser string) *Engine {
+	e.spider.AddSeed(url, parser)
+	return e
+}
 
-	e.spider.AddSeed(method, url, body, parser, proxy, header)
+func (e *Engine) AddRequest(req *types.Request) *Engine {
+	e.spider.AddRequest(req)
 	return e
 }
 
@@ -117,7 +118,7 @@ func (e *Engine) addSeedByFile(path, parser string) *Engine {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		data := scanner.Text()
-		e.spider.AddSeed("GET", data, nil, parser, "", nil)
+		e.spider.AddSeed(data, parser)
 		time.Sleep(time.Millisecond * 20)
 	}
 	return e

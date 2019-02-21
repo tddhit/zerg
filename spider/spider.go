@@ -1,8 +1,6 @@
 package spider
 
 import (
-	"io"
-	"net/http"
 	"time"
 
 	"github.com/tddhit/tools/log"
@@ -43,10 +41,17 @@ func (s *Spider) AddParser(parser Parser) *Spider {
 	return s
 }
 
-func (s *Spider) AddSeed(method, url string, body io.Reader,
-	parser, proxy string, header http.Header) *Spider {
+func (s *Spider) AddSeed(url, parser string) *Spider {
+	req, _ := types.NewRequest(url, parser)
+	select {
+	case s.seeds <- req:
+		//default:
+		//	log.Warnf("spider -> engine, chan is full, discard %s!", req.RawURL)
+	}
+	return s
+}
 
-	req, _ := types.NewRequest(method, url, body, parser, proxy, header, "")
+func (s *Spider) AddRequest(req *types.Request) *Spider {
 	select {
 	case s.seeds <- req:
 		//default:

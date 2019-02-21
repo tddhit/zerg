@@ -1,7 +1,6 @@
 package types
 
 import (
-	"io"
 	"net/http"
 )
 
@@ -25,14 +24,16 @@ type Item struct {
 	Writer string
 }
 
-func NewRequest(method, url string, body io.Reader,
-	parser, proxy string, header http.Header, crawler string) (*Request, error) {
-
-	req, err := http.NewRequest(method, url, body)
+func NewRequest(url, parser string, opts ...RequestOption) (*Request, error) {
+	opt := defaultRequestOptions
+	for _, o := range opts {
+		o(&opt)
+	}
+	req, err := http.NewRequest(opt.method, url, opt.body)
 	if err != nil {
 		return nil, err
 	}
-	for k, v1 := range header {
+	for k, v1 := range opt.header {
 		for _, v2 := range v1 {
 			req.Header.Add(k, v2)
 		}
@@ -42,8 +43,8 @@ func NewRequest(method, url string, body io.Reader,
 		Request: req,
 		RawURL:  url,
 		Parser:  parser,
-		Proxy:   proxy,
-		Crawler: crawler,
+		Proxy:   opt.proxy,
+		Crawler: opt.crawler,
 	}
 	return ireq, nil
 }
