@@ -2,6 +2,8 @@ package engine
 
 import (
 	"bufio"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"time"
 
@@ -13,12 +15,8 @@ import (
 	"github.com/tddhit/zerg/types"
 )
 
-type Option struct {
-	LogPath  string
-	LogLevel int
-}
-
 type Engine struct {
+	opt        *options
 	spider     *spider.Spider
 	scheduler  *scheduler.Scheduler
 	downloader *downloader.Downloader
@@ -41,8 +39,13 @@ type Engine struct {
 	itemToPipelineChan chan *types.Item
 }
 
-func NewEngine(option Option) *Engine {
+func NewEngine(opts ...Option) *Engine {
+	opt := defaultOptions
+	for _, o := range opts {
+		o(&opt)
+	}
 	e := &Engine{
+		opt:                   &opt,
 		reqToSchedulerChan:    make(chan *types.Request, 1000),
 		reqFromSchedulerChan:  make(chan *types.Request, 1000),
 		reqFromSpiderChan:     make(chan *types.Request, 1000),
@@ -56,7 +59,12 @@ func NewEngine(option Option) *Engine {
 	e.downloader = downloader.NewDownloader(e.reqToDownloaderChan, e.rspFromDownloaderChan)
 	e.pipeline = pipeline.NewPipeline(e.itemToPipelineChan)
 	e.spider = spider.NewSpider(e.reqFromSpiderChan, e.itemFromSpiderChan, e.rspToSpiderChan)
-	log.Init(option.LogPath, option.LogLevel)
+	log.Init(opt.logPath, opt.logLevel)
+	return e
+}
+
+func (e *Engine) AddProxy(proxy string) *Engine {
+	e.downloader.AddProxy(proxy)
 	return e
 }
 
@@ -129,6 +137,9 @@ func (e *Engine) Go() {
 	e.downloader.Go()
 	e.pipeline.Go()
 	e.spider.Go()
+	go func() {
+		http.ListenAndServe(":7777", nil)
+	}()
 	for {
 		select {
 		case req := <-e.reqFromSpiderChan:

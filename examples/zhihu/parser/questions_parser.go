@@ -56,7 +56,6 @@ func (p *questionsParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Re
 		if len(tokens) == 2 {
 			if page, err := strconv.Atoi(tokens[1]); err == nil {
 				url := fmt.Sprintf("%s?page=%d", tokens[0], page+1)
-				log.Error(url)
 				req, _ := types.NewRequest(url, "questions")
 				reqs = append(reqs, req)
 			}

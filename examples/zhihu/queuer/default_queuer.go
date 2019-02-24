@@ -22,6 +22,6 @@ func (q *DelayQueuer) Push(req *types.Request) {
 }
 
 func (q *DelayQueuer) Pop() *types.Request {
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	return <-q.queue
 }

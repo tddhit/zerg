@@ -31,6 +31,7 @@ func (c *HTTPCrawler) Crawl(req *types.Request) *types.Response {
 	if req.Proxy != "" {
 		proxy, err := url.Parse(req.Proxy)
 		if err != nil {
+			log.Error(err)
 			return nil
 		}
 		tr.Proxy = http.ProxyURL(proxy)
