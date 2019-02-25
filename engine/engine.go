@@ -9,6 +9,7 @@ import (
 
 	"github.com/tddhit/tools/log"
 	"github.com/tddhit/zerg/downloader"
+	"github.com/tddhit/zerg/downloader/crawler"
 	"github.com/tddhit/zerg/pipeline"
 	"github.com/tddhit/zerg/scheduler"
 	"github.com/tddhit/zerg/spider"
@@ -55,11 +56,12 @@ func NewEngine(opts ...Option) *Engine {
 		rspFromDownloaderChan: make(chan *types.Response, 1000),
 		itemToPipelineChan:    make(chan *types.Item, 1000),
 	}
+	log.Init(opt.logPath, opt.logLevel)
 	e.scheduler = scheduler.NewScheduler(e.reqToSchedulerChan, e.reqFromSchedulerChan)
 	e.downloader = downloader.NewDownloader(e.reqToDownloaderChan, e.rspFromDownloaderChan)
 	e.pipeline = pipeline.NewPipeline(e.itemToPipelineChan)
 	e.spider = spider.NewSpider(e.reqFromSpiderChan, e.itemFromSpiderChan, e.rspToSpiderChan)
-	log.Init(opt.logPath, opt.logLevel)
+	e.RegisterCrawler(crawler.NewDefaultCrawler(4))
 	return e
 }
 
@@ -109,9 +111,9 @@ func (e *Engine) AddSeedByFile(path, parser string) *Engine {
 	return e
 }
 
-func (e *Engine) AddCrawler(crawler downloader.Crawler) *Engine {
+func (e *Engine) RegisterCrawler(crawler downloader.Crawler) *Engine {
 	if crawler != nil {
-		e.downloader.AddCrawler(crawler)
+		e.downloader.RegisterCrawler(crawler)
 	} else {
 		log.Fatalf("crawler is nil!")
 	}
@@ -173,12 +175,21 @@ func (e *Engine) Go() {
 			}
 		case rsp := <-e.rspFromDownloaderChan:
 			if rsp != nil {
-				log.Debugf("downloader -> engine, rsp:%s(%s)", rsp.RawURL, rsp.Status)
-				select {
-				case e.rspToSpiderChan <- rsp:
-					log.Debugf("engine -> spider, rsp:%s", rsp.RawURL)
-				default:
-					log.Warnf("engine -> spider, chan is full, discard %s!", rsp.RawURL)
+				if rsp.Err != nil {
+					select {
+					case e.reqToSchedulerChan <- rsp.Request:
+						log.Debugf("engine -> scheduler, req:%s", rsp.Request.RawURL)
+					default:
+						log.Warnf("engine -> scheduler, chan is full, discard %s!", rsp.Request.RawURL)
+					}
+				} else {
+					log.Debugf("downloader -> engine, rsp:%s(%s)", rsp.RawURL, rsp.Status)
+					select {
+					case e.rspToSpiderChan <- rsp:
+						log.Debugf("engine -> spider, rsp:%s", rsp.RawURL)
+					default:
+						log.Warnf("engine -> spider, chan is full, discard %s!", rsp.RawURL)
+					}
 				}
 			}
 		}

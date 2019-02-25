@@ -2,8 +2,6 @@ package downloader
 
 import (
 	"sync"
-	"sync/atomic"
-	"time"
 
 	"github.com/tddhit/tools/log"
 	"github.com/tddhit/zerg/types"
@@ -13,6 +11,8 @@ type Crawler interface {
 	Name() string
 	Dispatch(req *types.Request)
 	CrawlLoop(rspC chan<- *types.Response)
+	AddProxy(addr string) error
+	RemoveProxy(addr string) error
 }
 
 type Downloader struct {
@@ -42,17 +42,21 @@ func (d *Downloader) RegisterCrawler(c Crawler) {
 }
 
 func (d *Downloader) AddProxy(addr string) *Downloader {
-	d.crawlers.Range(func(key, value interface{}) {
+	d.crawlers.Range(func(key, value interface{}) bool {
 		c := value.(Crawler)
 		c.AddProxy(addr)
+		return true
 	})
+	return d
 }
 
 func (d *Downloader) RemoveProxy(addr string) *Downloader {
-	d.crawlers.Range(func(key, value interface{}) {
+	d.crawlers.Range(func(key, value interface{}) bool {
 		c := value.(Crawler)
 		c.RemoveProxy(addr)
+		return true
 	})
+	return d
 }
 
 func (d *Downloader) Go() {
@@ -60,10 +64,10 @@ func (d *Downloader) Go() {
 		for {
 			req := <-d.reqC
 			if c, ok := d.crawlers.Load(req.Crawler); ok {
-				c.Dispatch(req)
+				c.(Crawler).Dispatch(req)
 			} else {
-				c = d.crawlers.Load("DEFAULT_Crawler")
-				c.Dispatch(req)
+				c, _ = d.crawlers.Load("DEFAULT_Crawler")
+				c.(Crawler).Dispatch(req)
 			}
 		}
 	}()

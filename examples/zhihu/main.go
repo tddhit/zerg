@@ -35,6 +35,7 @@ func main() {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		ip := scanner.Text()
+		log.Info("add")
 		engine.AddProxy(ip)
 	}
 	engine.Go()

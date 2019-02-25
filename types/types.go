@@ -14,9 +14,8 @@ type Request struct {
 
 type Response struct {
 	*http.Response
-	RawURL string
-	Parser string
-	err    error
+	*Request
+	Err error
 }
 
 type Item struct {
