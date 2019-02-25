@@ -16,6 +16,7 @@ type Response struct {
 	*http.Response
 	RawURL string
 	Parser string
+	err    error
 }
 
 type Item struct {
