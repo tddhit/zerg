@@ -8,7 +8,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 
 	"github.com/tddhit/tools/log"
-	"github.com/tddhit/zerg/types"
+	"github.com/tddhit/zerg"
 )
 
 const ROOTURL = "https://www.zhihu.com"
@@ -27,7 +27,7 @@ func (p *questionsParser) Name() string {
 	return p.name
 }
 
-func (p *questionsParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Request) {
+func (p *questionsParser) Parse(rsp *zerg.Response) ([]*zerg.Item, []*zerg.Request) {
 	tokens := strings.Split(rsp.RawURL, "/")
 	if len(tokens) != 7 {
 		log.Error("tokens != 7")
@@ -39,13 +39,13 @@ func (p *questionsParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Re
 		return nil, nil
 	}
 	var (
-		items []*types.Item
-		reqs  []*types.Request
+		items []*zerg.Item
+		reqs  []*zerg.Request
 	)
 	doc.Find("#Profile-following .ContentItem a").Each(
 		func(i int, contentSelection *goquery.Selection) {
 			href, _ := contentSelection.Attr("href")
-			item := types.NewItem("user2questions")
+			item := zerg.NewItem("user2questions")
 			item.Dict["user"] = tokens[4]
 			item.Dict["title"] = contentSelection.Text()
 			item.Dict["url"] = ROOTURL + href
@@ -56,7 +56,7 @@ func (p *questionsParser) Parse(rsp *types.Response) ([]*types.Item, []*types.Re
 		if len(tokens) == 2 {
 			if page, err := strconv.Atoi(tokens[1]); err == nil {
 				url := fmt.Sprintf("%s?page=%d", tokens[0], page+1)
-				req, _ := types.NewRequest(url, "questions")
+				req, _ := zerg.NewRequest(url, "questions")
 				reqs = append(reqs, req)
 			}
 		}

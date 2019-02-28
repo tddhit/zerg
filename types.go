@@ -1,4 +1,4 @@
-package types
+package zerg
 
 import (
 	"net/http"
@@ -19,9 +19,9 @@ type Response struct {
 }
 
 type Item struct {
-	Dict   map[string]interface{}
-	RawURL string
-	Writer string
+	Dict    map[string]interface{}
+	RawURL  string
+	Writers []string
 }
 
 func NewRequest(url, parser string, opts ...RequestOption) (*Request, error) {
@@ -46,13 +46,19 @@ func NewRequest(url, parser string, opts ...RequestOption) (*Request, error) {
 		Proxy:   opt.proxy,
 		Crawler: opt.crawler,
 	}
+	if ireq.Crawler == "" {
+		ireq.Crawler = "DEFAULT_CRAWLER"
+	}
 	return ireq, nil
 }
 
-func NewItem(writer string) *Item {
+func NewItem(writers ...string) *Item {
 	i := &Item{
-		Dict:   make(map[string]interface{}),
-		Writer: writer,
+		Dict:    make(map[string]interface{}),
+		Writers: writers,
+	}
+	if len(i.Writers) == 0 {
+		i.Writers = append(i.Writers, "DEFAULT_WRITER")
 	}
 	return i
 }

@@ -3,9 +3,10 @@ package writer
 import (
 	"bytes"
 	"os"
+	"sort"
 
 	"github.com/tddhit/tools/log"
-	"github.com/tddhit/zerg/types"
+	"github.com/tddhit/zerg"
 )
 
 type FileWriter struct {
@@ -30,17 +31,22 @@ func (w *FileWriter) Name() string {
 	return w.name
 }
 
-func (w *FileWriter) Write(item *types.Item) {
-	var buf bytes.Buffer
-	count := 0
-	for key, value := range item.Dict {
+func (w *FileWriter) Write(item *zerg.Item) {
+	var (
+		buf        bytes.Buffer
+		sortedKeys = make([]string, 0, len(item.Dict))
+	)
+	for key, _ := range item.Dict {
+		sortedKeys = append(sortedKeys, key)
+	}
+	sort.Strings(sortedKeys)
+	for _, key := range sortedKeys {
 		buf.WriteString(key)
 		buf.WriteString("=")
-		buf.WriteString(value.(string))
+		buf.WriteString(item.Dict[key].(string))
 		buf.WriteString("\t")
-		count++
 	}
-	if count > 0 {
+	if len(sortedKeys) > 0 {
 		buf.WriteString("\n")
 	}
 	w.WriteString(buf.String())
