@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -171,6 +172,16 @@ func (c *DefaultCrawler) AddProxy(addr string) {
 	if _, ok := c.pool[addr]; ok {
 		log.Errorf("proxy[%s] already exist.", addr)
 	} else {
+		conn, err := net.DialTimeout(
+			"tcp",
+			strings.TrimPrefix(addr, "http://"),
+			2*time.Second,
+		)
+		if err != nil {
+			log.Errorf("dial proxy[%s] failed. err:%s", addr, err)
+			return
+		}
+		conn.Close()
 		c.pool[addr] = &proxy{
 			addr:   addr,
 			closeC: make(chan struct{}),

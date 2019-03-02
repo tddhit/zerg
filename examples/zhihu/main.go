@@ -26,12 +26,12 @@ func main() {
 	defer f.Close()
 
 	engine, err := zerg.New(
-		zerg.WithLogLevel(log.INFO),
+		zerg.WithLogLevel(log.DEBUG),
 		zerg.WithLogPath(""),
 		zerg.WithParser(parser.NewFollowersParser("followers")),
 		zerg.WithParser(parser.NewQuestionsParser("questions")),
 		zerg.WithWriter(writer.NewFileWriter("user2questions", "user2questions.txt")),
-		zerg.WithCrawler(crawler.NewDefaultCrawler()),
+		zerg.WithCrawler(crawler.NewDefaultCrawler(crawler.WithConcurrency(1))),
 		zerg.WithQueuer(queuer.NewDefaultQueuer()),
 	)
 	if err != nil {
@@ -44,7 +44,6 @@ func main() {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		ip := scanner.Text()
-		log.Info("add")
 		engine.AddProxy(ip)
 	}
 	engine.Start()

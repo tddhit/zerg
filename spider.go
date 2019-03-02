@@ -89,7 +89,8 @@ func (s *spider) start() {
 				rsp.Body.Close()
 				end := time.Now()
 				elapsed := end.Sub(start)
-				log.Debugf("parse %s spend %dms\n", rsp.RawURL, elapsed/1000000)
+				log.Debugf("parse %s spend %dms, req:%d, item:%d\n",
+					rsp.RawURL, elapsed/1000000, len(reqs), len(items))
 				for _, item := range items {
 					if item == nil {
 						continue
