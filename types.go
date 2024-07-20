@@ -18,7 +18,8 @@ type Request struct {
 type Response struct {
 	*http.Response
 	*Request
-	Err error
+	Retry int
+	Err   error
 }
 
 type Item struct {

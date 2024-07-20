@@ -12,11 +12,14 @@ type zergOptions struct {
 	writers  []Writer
 	parsers  []Parser
 	queuer   Queuer
+	maxRetry int
 }
 
 type ZergOption func(*zergOptions)
 
-var defaultZergOptions = zergOptions{}
+var defaultZergOptions = zergOptions{
+	maxRetry: 1,
+}
 
 func WithLogPath(path string) ZergOption {
 	return func(o *zergOptions) {
@@ -51,6 +54,12 @@ func WithWriter(w Writer) ZergOption {
 func WithQueuer(q Queuer) ZergOption {
 	return func(o *zergOptions) {
 		o.queuer = q
+	}
+}
+
+func WithMaxRetry(max int) ZergOption {
+	return func(o *zergOptions) {
+		o.maxRetry = max
 	}
 }
 

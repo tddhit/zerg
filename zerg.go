@@ -151,9 +151,13 @@ func (z *Zerg) Start() {
 			}
 			log.Debugf("downloader -> engine, req:%s", rsp.RawURL)
 			if rsp.Err != nil {
-				z.reqToSchedulerC <- rsp.Request
-				log.Debugf("engine -> scheduler(requeue), req:%s, err:%s",
-					rsp.RawURL, rsp.Err)
+				if rsp.Retry < z.opt.maxRetry {
+					rsp.Retry++
+					log.Warnf("retry:%d engine -> scheduler(requeue), req:%s, err:%s", rsp.Retry, rsp.RawURL, rsp.Err)
+					z.reqToSchedulerC <- rsp.Request
+				} else {
+					log.Errorf("engine -> scheduler(requeue), req:%s, err:%s", rsp.RawURL, rsp.Err)
+				}
 			} else {
 				z.rspToSpiderC <- rsp
 				log.Debugf("engine -> spider, rsp:%s", rsp.RawURL)
