@@ -113,11 +113,11 @@ func (c *DefaultCrawler) crawl(client *http.Client, proxyCloseC <-chan struct{})
 			start := time.Now()
 			rsp, err := client.Do(req.Request)
 			if err != nil {
-				log.Errorf("Failed Crawl %s %s\n!", req.RawURL, err)
-				time.Sleep(2 * time.Second)
+				log.Errorf("Failed Crawl %s %s\n!", req, err)
+				time.Sleep(c.opt.interval)
 				c.rspToEngineC <- &zerg.Response{
 					Request: req,
-					Err:     fmt.Errorf("crawl failed: %s.", c.Name(), err),
+					Err:     fmt.Errorf("%s crawl failed: %s.", c.Name(), err),
 				}
 				continue
 			}

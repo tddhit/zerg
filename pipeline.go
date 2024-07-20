@@ -27,7 +27,6 @@ func (p *pipeline) addWriter(w Writer) {
 	} else {
 		log.Warnf("writer[%s] is already exist!", w.Name())
 	}
-	log.Debug("!!!:", w.Name())
 }
 
 func (p *pipeline) start() {

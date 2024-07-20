@@ -55,16 +55,24 @@ func WithQueuer(q Queuer) ZergOption {
 }
 
 type requestOptions struct {
-	method  string
-	proxy   string
-	crawler string
-	body    io.Reader
-	header  http.Header
+	id       string
+	method   string
+	proxy    string
+	crawler  string
+	body     io.Reader
+	header   http.Header
+	metadata map[string]string
 }
 
 type RequestOption func(*requestOptions)
 
 var defaultRequestOptions = requestOptions{}
+
+func WithRequestID(id string) RequestOption {
+	return func(o *requestOptions) {
+		o.id = id
+	}
+}
 
 func WithMethod(method string) RequestOption {
 	return func(o *requestOptions) {
@@ -93,5 +101,11 @@ func WithBody(body io.Reader) RequestOption {
 func WithHeader(header http.Header) RequestOption {
 	return func(o *requestOptions) {
 		o.header = header
+	}
+}
+
+func WithMetadata(meta map[string]string) RequestOption {
+	return func(o *requestOptions) {
+		o.metadata = meta
 	}
 }

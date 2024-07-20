@@ -124,9 +124,9 @@ func (z *Zerg) Start() {
 		}
 		select {
 		case req := <-z.reqFromSpiderC:
-			log.Debugf("spider -> engine, req:%s", req.RawURL)
+			log.Debugf("spider -> engine, req:%s", req.String())
 			z.reqToSchedulerC <- req
-			log.Debugf("engine -> scheduler, req:%s", req.RawURL)
+			log.Debugf("engine -> scheduler, req:%s", req.String())
 		case item := <-z.itemFromSpiderC:
 			log.Debugf("spider -> engine, item:%s", item.RawURL)
 			z.itemToPipelineC <- item
@@ -137,9 +137,9 @@ func (z *Zerg) Start() {
 				atomic.StoreInt32(&z.stopFlag, 1)
 				continue
 			}
-			log.Debugf("scheduler -> engine, req:%s", req.RawURL)
+			log.Debugf("scheduler -> engine, req:%s", req.String())
 			z.reqToDownloaderC <- req
-			log.Debugf("engine -> downloader, req:%s", req.RawURL)
+			log.Debugf("engine -> downloader, req:%s", req.String())
 		case rsp, ok := <-z.rspFromDownloaderC:
 			if !ok {
 				z.rspFromDownloaderC = nil
