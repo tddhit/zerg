@@ -6,15 +6,15 @@ import (
 
 type Writer interface {
 	Name() string
-	Write(item *Item)
+	Write(item *Item) *Item
 }
 
 type pipeline struct {
 	writers map[string]Writer
-	itemC   <-chan *Item
+	itemC   chan *Item
 }
 
-func newPipeline(itemC <-chan *Item) *pipeline {
+func newPipeline(itemC chan *Item) *pipeline {
 	return &pipeline{
 		writers: make(map[string]Writer),
 		itemC:   itemC,
@@ -34,7 +34,9 @@ func (p *pipeline) start() {
 		item := <-p.itemC
 		for _, name := range item.Writers {
 			if w, ok := p.writers[name]; ok {
-				w.Write(item)
+				if newItem := w.Write(item); newItem != nil {
+					p.itemC <- newItem
+				}
 			} else {
 				log.Errorf("item[url:%s, writer:%s] has no corresponding writer",
 					item.RawURL, name)

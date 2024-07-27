@@ -157,6 +157,11 @@ func (z *Zerg) Start() {
 					z.reqToSchedulerC <- rsp.Request
 				} else {
 					log.Errorf("engine -> scheduler(requeue), req:%s, err:%s", rsp.RawURL, rsp.Err)
+					if rsp.Callback != nil {
+						if item := rsp.Callback(rsp.Request, rsp.Err); item != nil {
+							z.itemToPipelineC <- item
+						}
+					}
 				}
 			} else {
 				z.rspToSpiderC <- rsp

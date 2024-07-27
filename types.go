@@ -13,6 +13,7 @@ type Request struct {
 	Crawler  string
 	ID       string
 	Metadata map[string]string
+	Callback func(*Request, error) *Item
 }
 
 type Response struct {
@@ -51,6 +52,7 @@ func NewRequest(url, parser string, opts ...RequestOption) (*Request, error) {
 		Proxy:    opt.proxy,
 		Crawler:  opt.crawler,
 		Metadata: opt.metadata,
+		Callback: opt.callback,
 		ID:       opt.id,
 	}
 	if ireq.Crawler == "" {

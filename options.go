@@ -71,6 +71,7 @@ type requestOptions struct {
 	body     io.Reader
 	header   http.Header
 	metadata map[string]string
+	callback func(*Request, error) *Item
 }
 
 type RequestOption func(*requestOptions)
@@ -116,5 +117,11 @@ func WithHeader(header http.Header) RequestOption {
 func WithMetadata(meta map[string]string) RequestOption {
 	return func(o *requestOptions) {
 		o.metadata = meta
+	}
+}
+
+func WithCallback(callback func(*Request, error) *Item) RequestOption {
+	return func(o *requestOptions) {
+		o.callback = callback
 	}
 }
