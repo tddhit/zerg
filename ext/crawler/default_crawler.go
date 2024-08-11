@@ -33,7 +33,7 @@ var defaultOptions = options{
 	concurrency: 4,
 	interval:    2 * time.Second,
 	dialTimeout: 5 * time.Second,
-	readTimeout: 15 * time.Second,
+	readTimeout: 30 * time.Second,
 }
 
 func WithConcurrency(n int) Option {
@@ -119,6 +119,10 @@ func (c *DefaultCrawler) crawl(client *http.Client, proxyCloseC <-chan struct{})
 					Request: req,
 					Err:     fmt.Errorf("%s crawl failed: %s.", c.Name(), err),
 				}
+				continue
+			}
+			if rsp.StatusCode != http.StatusOK {
+				log.Errorf("Failed Crawl %s status(%s) \n!", req.RawURL, rsp.Status)
 				continue
 			}
 			end := time.Now()
