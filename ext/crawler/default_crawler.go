@@ -21,6 +21,7 @@ type proxy struct {
 }
 
 type options struct {
+	name        string
 	concurrency int
 	interval    time.Duration
 	dialTimeout time.Duration
@@ -34,6 +35,12 @@ var defaultOptions = options{
 	interval:    2 * time.Second,
 	dialTimeout: 5 * time.Second,
 	readTimeout: 30 * time.Second,
+}
+
+func WithName(name string) Option {
+	return func(o *options) {
+		o.name = name
+	}
 }
 
 func WithConcurrency(n int) Option {
@@ -83,6 +90,9 @@ func NewDefaultCrawler(opts ...Option) *DefaultCrawler {
 }
 
 func (c *DefaultCrawler) Name() string {
+	if c.opt.name != "" {
+		return c.opt.name
+	}
 	return "DEFAULT_CRAWLER"
 }
 

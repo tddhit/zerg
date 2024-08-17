@@ -86,7 +86,9 @@ func (s *spider) start() {
 			go func(rsp *Response) {
 				start := time.Now()
 				items, reqs := parser.Parse(rsp)
-				rsp.Body.Close()
+				if rsp.Response != nil {
+					rsp.Body.Close()
+				}
 				end := time.Now()
 				elapsed := end.Sub(start)
 				log.Debugf("parse %s spend %dms, req:%d, item:%d\n",

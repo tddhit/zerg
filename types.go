@@ -18,6 +18,7 @@ type Request struct {
 
 type Response struct {
 	*http.Response
+	HTML string
 	*Request
 	Retry int
 	Err   error
